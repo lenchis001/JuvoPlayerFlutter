@@ -1,5 +1,5 @@
-name: video_player_example
-description: Demonstrates how to use the video_player_tizen plugin.
+name: JuvoPlayerFlutter
+description: Demonstrates how to use the JuvoPlayer in Flutter.
 publish_to: "none"
 
 dependencies:
@@ -10,14 +10,8 @@ dependencies:
     path: ../
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
   flutter_driver:
     sdk: flutter
-  integration_test:
-    sdk: flutter
-  integration_test_tizen:
-    path: ../../integration_test/
   pedantic: ^1.10.0
 
 flutter:

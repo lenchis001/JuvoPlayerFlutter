@@ -82,7 +82,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_test:
-    dependency: "direct dev"
+    dependency: transitive
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -96,18 +96,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  integration_test:
-    dependency: "direct dev"
-    description: flutter
-    source: sdk
-    version: "0.0.0"
-  integration_test_tizen:
-    dependency: "direct dev"
-    description:
-      path: "../../integration_test"
-      relative: true
-    source: path
-    version: "2.0.0"
   js:
     dependency: transitive
     description:
