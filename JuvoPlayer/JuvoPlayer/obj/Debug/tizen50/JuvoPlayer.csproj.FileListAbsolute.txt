@@ -1,0 +1,16 @@
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/tizen50/JuvoPlayer.deps.json
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/tizen50/JuvoPlayer.dll
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/tizen50/JuvoPlayer.pdb
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/tizen50/Configuration.dll
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/tizen50/MpdParser.dll
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/tizen50/RTSP.dll
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/tizen50/Configuration.pdb
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/tizen50/MpdParser.pdb
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/tizen50/RTSP.pdb
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/tizen50/JuvoPlayer.csproj.AssemblyReference.cache
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/tizen50/JuvoPlayer.AssemblyInfoInputs.cache
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/tizen50/JuvoPlayer.AssemblyInfo.cs
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/tizen50/JuvoPlayer.csproj.CoreCompileInputs.cache
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/tizen50/JuvoPlayer.csproj.CopyComplete
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/tizen50/JuvoPlayer.dll
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/tizen50/JuvoPlayer.pdb

@@ -1,0 +1,5 @@
+/home/leon/Projects/JuvoPlayerFlutter/example/build/tizen/tpk/tpkroot/bin/Configuration.dll
+/home/leon/Projects/JuvoPlayerFlutter/example/build/tizen/tpk/tpkroot/bin/Configuration.pdb
+/home/leon/Projects/JuvoPlayerFlutter/example/build/tizen/tpk/tpkroot/Configuration.deps.json
+/home/leon/Projects/JuvoPlayerFlutter/example/build/tizen/tpk/tpkroot/res/logger.config
+/home/leon/Projects/JuvoPlayerFlutter/example/build/tizen/tpk/-.tpk

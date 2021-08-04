@@ -1,0 +1,16 @@
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/netcoreapp2.1/JuvoPlayer.deps.json
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/netcoreapp2.1/JuvoPlayer.dll
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/netcoreapp2.1/JuvoPlayer.pdb
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/netcoreapp2.1/Configuration.dll
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/netcoreapp2.1/MpdParser.dll
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/netcoreapp2.1/RTSP.dll
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/netcoreapp2.1/Configuration.pdb
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/netcoreapp2.1/MpdParser.pdb
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/bin/Debug/netcoreapp2.1/RTSP.pdb
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/netcoreapp2.1/JuvoPlayer.csproj.AssemblyReference.cache
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/netcoreapp2.1/JuvoPlayer.AssemblyInfoInputs.cache
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/netcoreapp2.1/JuvoPlayer.AssemblyInfo.cs
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/netcoreapp2.1/JuvoPlayer.csproj.CoreCompileInputs.cache
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/netcoreapp2.1/JuvoPlayer.csproj.CopyComplete
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/netcoreapp2.1/JuvoPlayer.dll
+/home/leon/Projects/JuvoPlayer/JuvoPlayer/obj/Debug/netcoreapp2.1/JuvoPlayer.pdb

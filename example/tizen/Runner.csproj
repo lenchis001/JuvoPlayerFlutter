@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(FlutterEmbeddingPath)" />
+    <ProjectReference Include="..\..\JuvoPlayer\JuvoPlayer\JuvoPlayer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

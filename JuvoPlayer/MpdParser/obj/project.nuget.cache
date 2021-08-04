@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "2G7GnY/al+6l5JG+CEWkeHx1iDnHL9cTaXpKF+fxgm6GhlkKFBZ2+0jWmJJIc1cfv4zzCZsNkO3Oou1GswMRWw==",
+  "success": true,
+  "projectFilePath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/MpdParser/MpdParser.csproj",
+  "expectedPackageFiles": [
+    "/home/leon/.nuget/packages/microsoft.netcore.platforms/1.1.0/microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "/home/leon/.nuget/packages/netstandard.library/2.0.3/netstandard.library.2.0.3.nupkg.sha512",
+    "/home/leon/.nuget/packages/polly/7.0.3/polly.7.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

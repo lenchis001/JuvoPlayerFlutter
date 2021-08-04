@@ -1,0 +1,473 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/JuvoPlayer/JuvoPlayer.csproj": {}
+  },
+  "projects": {
+    "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/Configuration/Configuration.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/Configuration/Configuration.csproj",
+        "projectName": "Configuration",
+        "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/Configuration/Configuration.csproj",
+        "packagesPath": "/home/leon/.nuget/packages/",
+        "outputPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/Configuration/obj/",
+        "projectStyle": "PackageReference",
+        "crossTargeting": true,
+        "configFilePaths": [
+          "/home/leon/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.0",
+          "tizen50"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.0": {
+            "targetAlias": "netstandard2.0",
+            "projectReferences": {}
+          },
+          "tizen50": {
+            "targetAlias": "tizen50",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netstandard2.0": {
+          "targetAlias": "netstandard2.0",
+          "dependencies": {
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.302/RuntimeIdentifierGraph.json"
+        },
+        "tizen50": {
+          "targetAlias": "tizen50",
+          "dependencies": {
+            "Tizen.NET": {
+              "include": "Compile, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0.15631, )",
+              "autoReferenced": true
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.302/RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/JuvoPlayer/JuvoPlayer.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/JuvoPlayer/JuvoPlayer.csproj",
+        "projectName": "JuvoPlayer",
+        "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/JuvoPlayer/JuvoPlayer.csproj",
+        "packagesPath": "/home/leon/.nuget/packages/",
+        "outputPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/JuvoPlayer/obj/",
+        "projectStyle": "PackageReference",
+        "crossTargeting": true,
+        "configFilePaths": [
+          "/home/leon/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp2.1",
+          "netstandard2.0",
+          "tizen50"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp2.1": {
+            "targetAlias": "netcoreapp2.1",
+            "projectReferences": {
+              "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/Configuration/Configuration.csproj": {
+                "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/Configuration/Configuration.csproj"
+              },
+              "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/MpdParser/MpdParser.csproj": {
+                "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/MpdParser/MpdParser.csproj"
+              },
+              "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/thirdparty/RTSP/RTSP.csproj": {
+                "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/thirdparty/RTSP/RTSP.csproj"
+              }
+            }
+          },
+          "netstandard2.0": {
+            "targetAlias": "netstandard2.0",
+            "projectReferences": {
+              "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/Configuration/Configuration.csproj": {
+                "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/Configuration/Configuration.csproj"
+              },
+              "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/MpdParser/MpdParser.csproj": {
+                "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/MpdParser/MpdParser.csproj"
+              },
+              "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/thirdparty/RTSP/RTSP.csproj": {
+                "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/thirdparty/RTSP/RTSP.csproj"
+              }
+            }
+          },
+          "tizen50": {
+            "targetAlias": "tizen50",
+            "projectReferences": {
+              "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/Configuration/Configuration.csproj": {
+                "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/Configuration/Configuration.csproj"
+              },
+              "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/MpdParser/MpdParser.csproj": {
+                "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/MpdParser/MpdParser.csproj"
+              },
+              "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/thirdparty/RTSP/RTSP.csproj": {
+                "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/thirdparty/RTSP/RTSP.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp2.1": {
+          "targetAlias": "netcoreapp2.1",
+          "dependencies": {
+            "FFmpegBindings": {
+              "target": "Package",
+              "version": "[3.3.6, )"
+            },
+            "Microsoft.NETCore.App": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.1.0, )",
+              "autoReferenced": true
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[10.0.3, )"
+            },
+            "Nito.AsyncEx": {
+              "target": "Package",
+              "version": "[5.0.0-pre-05, )"
+            },
+            "Nito.AsyncEx.Context": {
+              "target": "Package",
+              "version": "[5.0.0-pre-05, )"
+            },
+            "Overby.Extensions.AsyncBinaryReaderWriter": {
+              "target": "Package",
+              "version": "[1.0.39, )"
+            },
+            "SkiaSharp": {
+              "include": "Compile, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "target": "Package",
+              "version": "[1.60.3, )"
+            },
+            "System.Memory": {
+              "target": "Package",
+              "version": "[4.5.3, )"
+            },
+            "System.Reactive": {
+              "target": "Package",
+              "version": "[4.1.2, )"
+            },
+            "System.Text.Encoding.CodePages": {
+              "target": "Package",
+              "version": "[4.5.0, )"
+            },
+            "System.Threading.Channels": {
+              "target": "Package",
+              "version": "[4.5.0, )"
+            },
+            "Tizen.NET.TV": {
+              "include": "Compile, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "target": "Package",
+              "version": "[5.5.0.4997532, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.302/RuntimeIdentifierGraph.json"
+        },
+        "netstandard2.0": {
+          "targetAlias": "netstandard2.0",
+          "dependencies": {
+            "FFmpegBindings": {
+              "target": "Package",
+              "version": "[3.3.6, )"
+            },
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[10.0.3, )"
+            },
+            "Nito.AsyncEx": {
+              "target": "Package",
+              "version": "[5.0.0-pre-05, )"
+            },
+            "Nito.AsyncEx.Context": {
+              "target": "Package",
+              "version": "[5.0.0-pre-05, )"
+            },
+            "Overby.Extensions.AsyncBinaryReaderWriter": {
+              "target": "Package",
+              "version": "[1.0.39, )"
+            },
+            "SkiaSharp": {
+              "include": "Compile, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "target": "Package",
+              "version": "[1.60.3, )"
+            },
+            "System.Memory": {
+              "target": "Package",
+              "version": "[4.5.3, )"
+            },
+            "System.Reactive": {
+              "target": "Package",
+              "version": "[4.1.2, )"
+            },
+            "System.Text.Encoding.CodePages": {
+              "target": "Package",
+              "version": "[4.5.0, )"
+            },
+            "System.Threading.Channels": {
+              "target": "Package",
+              "version": "[4.5.0, )"
+            },
+            "Tizen.NET.TV": {
+              "include": "Compile, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "target": "Package",
+              "version": "[5.5.0.4997532, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.302/RuntimeIdentifierGraph.json"
+        },
+        "tizen50": {
+          "targetAlias": "tizen50",
+          "dependencies": {
+            "FFmpegBindings": {
+              "target": "Package",
+              "version": "[3.3.6, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[10.0.3, )"
+            },
+            "Nito.AsyncEx": {
+              "target": "Package",
+              "version": "[5.0.0-pre-05, )"
+            },
+            "Nito.AsyncEx.Context": {
+              "target": "Package",
+              "version": "[5.0.0-pre-05, )"
+            },
+            "Overby.Extensions.AsyncBinaryReaderWriter": {
+              "target": "Package",
+              "version": "[1.0.39, )"
+            },
+            "SkiaSharp": {
+              "include": "Compile, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "target": "Package",
+              "version": "[1.60.3, )"
+            },
+            "System.Memory": {
+              "target": "Package",
+              "version": "[4.5.3, )"
+            },
+            "System.Reactive": {
+              "target": "Package",
+              "version": "[4.1.2, )"
+            },
+            "System.Text.Encoding.CodePages": {
+              "target": "Package",
+              "version": "[4.5.0, )"
+            },
+            "System.Threading.Channels": {
+              "target": "Package",
+              "version": "[4.5.0, )"
+            },
+            "Tizen.NET": {
+              "include": "Compile, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0.15631, )",
+              "autoReferenced": true
+            },
+            "Tizen.NET.TV": {
+              "include": "Compile, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "target": "Package",
+              "version": "[5.5.0.4997532, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.302/RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/MpdParser/MpdParser.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/MpdParser/MpdParser.csproj",
+        "projectName": "MpdParser",
+        "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/MpdParser/MpdParser.csproj",
+        "packagesPath": "/home/leon/.nuget/packages/",
+        "outputPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/MpdParser/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/leon/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.0": {
+            "targetAlias": "netstandard2.0",
+            "projectReferences": {
+              "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/Configuration/Configuration.csproj": {
+                "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/Configuration/Configuration.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netstandard2.0": {
+          "targetAlias": "netstandard2.0",
+          "dependencies": {
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            },
+            "Polly": {
+              "target": "Package",
+              "version": "[7.0.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.302/RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/thirdparty/RTSP/RTSP.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/thirdparty/RTSP/RTSP.csproj",
+        "projectName": "RTSP",
+        "projectPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/thirdparty/RTSP/RTSP.csproj",
+        "packagesPath": "/home/leon/.nuget/packages/",
+        "outputPath": "/home/leon/Projects/JuvoPlayerFlutter/JuvoPlayer/thirdparty/RTSP/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/leon/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.0": {
+            "targetAlias": "netstandard2.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netstandard2.0": {
+          "targetAlias": "netstandard2.0",
+          "dependencies": {
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            },
+            "System.Reactive": {
+              "target": "Package",
+              "version": "[4.1.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.302/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

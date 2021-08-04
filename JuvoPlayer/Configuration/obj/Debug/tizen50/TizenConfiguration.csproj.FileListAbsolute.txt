@@ -1,0 +1,5 @@
+/home/leon/Projects/JuvoPlayer/Configuration/bin/Debug/tizen50/tpkroot/bin/Configuration.dll
+/home/leon/Projects/JuvoPlayer/Configuration/bin/Debug/tizen50/tpkroot/bin/Configuration.pdb
+/home/leon/Projects/JuvoPlayer/Configuration/bin/Debug/tizen50/tpkroot/Configuration.deps.json
+/home/leon/Projects/JuvoPlayer/Configuration/bin/Debug/tizen50/tpkroot/res/logger.config
+/home/leon/Projects/JuvoPlayer/Configuration/bin/Debug/tizen50/-.tpk

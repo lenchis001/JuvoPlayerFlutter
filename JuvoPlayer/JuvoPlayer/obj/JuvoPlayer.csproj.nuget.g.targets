@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+  <ImportGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)netstandard.library/2.0.3/build/netstandard2.0/NETStandard.Library.targets" Condition="Exists('$(NuGetPackageRoot)netstandard.library/2.0.3/build/netstandard2.0/NETStandard.Library.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.netcore.app/2.1.0/build/netcoreapp2.1/Microsoft.NETCore.App.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.netcore.app/2.1.0/build/netcoreapp2.1/Microsoft.NETCore.App.targets')" />
+  </ImportGroup>
+  <ImportGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)netstandard.library/2.0.3/build/netstandard2.0/NETStandard.Library.targets" Condition="Exists('$(NuGetPackageRoot)netstandard.library/2.0.3/build/netstandard2.0/NETStandard.Library.targets')" />
+  </ImportGroup>
+  <ImportGroup Condition=" '$(TargetFramework)' == 'tizen50' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)tizen.net.api5/5.0.0.14638/build/tizen50/Tizen.NET.API5.targets" Condition="Exists('$(NuGetPackageRoot)tizen.net.api5/5.0.0.14638/build/tizen50/Tizen.NET.API5.targets')" />
+    <Import Project="$(NuGetPackageRoot)tizen.net/8.0.0.15631/build/tizen40/Tizen.NET.targets" Condition="Exists('$(NuGetPackageRoot)tizen.net/8.0.0.15631/build/tizen40/Tizen.NET.targets')" />
+    <Import Project="$(NuGetPackageRoot)skiasharp/1.60.3/build/tizen40/SkiaSharp.targets" Condition="Exists('$(NuGetPackageRoot)skiasharp/1.60.3/build/tizen40/SkiaSharp.targets')" />
+    <Import Project="$(NuGetPackageRoot)ffmpegbindings/3.3.6/build/tizen40/FFmpegBindings.targets" Condition="Exists('$(NuGetPackageRoot)ffmpegbindings/3.3.6/build/tizen40/FFmpegBindings.targets')" />
+  </ImportGroup>
+</Project>
