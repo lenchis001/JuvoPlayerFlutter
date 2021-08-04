@@ -28,20 +28,7 @@ class _App extends StatelessWidget {
         key: const ValueKey<String>('home_page'),
         appBar: AppBar(
           title: const Text('Video player example'),
-          actions: <Widget>[
-            IconButton(
-              key: const ValueKey<String>('push_tab'),
-              icon: const Icon(Icons.navigation),
-              onPressed: () {
-                Navigator.push<_PlayerVideoAndPopPage>(
-                  context,
-                  MaterialPageRoute<_PlayerVideoAndPopPage>(
-                    builder: (BuildContext context) => _PlayerVideoAndPopPage(),
-                  ),
-                );
-              },
-            )
-          ],
+          actions: <Widget>[],
           bottom: const TabBar(
             isScrollable: true,
             tabs: <Widget>[
@@ -80,7 +67,7 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   void initState() {
     super.initState();
     _controller = VideoPlayerController.network(
-      'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
+      'https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd',
       closedCaptionFile: _loadCaptions(),
       videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
     );
@@ -130,17 +117,6 @@ class _ControlsOverlay extends StatelessWidget {
   const _ControlsOverlay({Key? key, required this.controller})
       : super(key: key);
 
-  static const _examplePlaybackRates = [
-    0.25,
-    0.5,
-    1.0,
-    1.5,
-    2.0,
-    3.0,
-    5.0,
-    10.0,
-  ];
-
   final VideoPlayerController controller;
 
   @override
@@ -167,95 +143,13 @@ class _ControlsOverlay extends StatelessWidget {
           onTap: () {
             controller.value.isPlaying ? controller.pause() : controller.play();
           },
-        ),
-        Align(
-          alignment: Alignment.topRight,
-          child: PopupMenuButton<double>(
-            initialValue: controller.value.playbackSpeed,
-            tooltip: 'Playback speed',
-            onSelected: (speed) {
-              controller.setPlaybackSpeed(speed);
-            },
-            itemBuilder: (context) {
-              return [
-                for (final speed in _examplePlaybackRates)
-                  PopupMenuItem(
-                    value: speed,
-                    child: Text('${speed}x'),
-                  )
-              ];
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                // Using less vertical padding as the text is also longer
-                // horizontally, so it feels like it would need more spacing
-                // horizontally (matching the aspect ratio of the video).
-                vertical: 12,
-                horizontal: 16,
-              ),
-              child: Text('${controller.value.playbackSpeed}x'),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PlayerVideoAndPopPage extends StatefulWidget {
-  @override
-  _PlayerVideoAndPopPageState createState() => _PlayerVideoAndPopPageState();
-}
-
-class _PlayerVideoAndPopPageState extends State<_PlayerVideoAndPopPage> {
-  late VideoPlayerController _videoPlayerController;
-  bool startedPlaying = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _videoPlayerController =
-        VideoPlayerController.asset('assets/Butterfly-209.mp4');
-    _videoPlayerController.addListener(() {
-      if (startedPlaying && !_videoPlayerController.value.isPlaying) {
-        Navigator.pop(context);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _videoPlayerController.dispose();
-    super.dispose();
-  }
-
-  Future<bool> started() async {
-    await _videoPlayerController.initialize();
-    await _videoPlayerController.play();
-    startedPlaying = true;
-    return true;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      elevation: 0,
-      child: Center(
-        child: FutureBuilder<bool>(
-          future: started(),
-          builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-            if (snapshot.data == true) {
-              return AspectRatio(
-                aspectRatio: _videoPlayerController.value.aspectRatio,
-                child: VideoPlayer(_videoPlayerController),
-              );
-            } else {
-              return const Text('waiting for video to load');
-            }
+        ),OutlinedButton(
+          onPressed: () {
+            controller.value.isPlaying ? controller.pause() : controller.play();
           },
-        ),
-      ),
+          child: const Text('Play'),
+        )
+      ],
     );
   }
 }
