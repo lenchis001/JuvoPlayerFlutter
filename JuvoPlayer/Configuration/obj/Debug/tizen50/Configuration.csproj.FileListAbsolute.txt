@@ -1,9 +1,0 @@
-/home/leon/Projects/JuvoPlayer/Configuration/bin/Debug/tizen50/Configuration.deps.json
-/home/leon/Projects/JuvoPlayer/Configuration/bin/Debug/tizen50/Configuration.dll
-/home/leon/Projects/JuvoPlayer/Configuration/bin/Debug/tizen50/Configuration.pdb
-/home/leon/Projects/JuvoPlayer/Configuration/obj/Debug/tizen50/Configuration.csproj.AssemblyReference.cache
-/home/leon/Projects/JuvoPlayer/Configuration/obj/Debug/tizen50/Configuration.AssemblyInfoInputs.cache
-/home/leon/Projects/JuvoPlayer/Configuration/obj/Debug/tizen50/Configuration.AssemblyInfo.cs
-/home/leon/Projects/JuvoPlayer/Configuration/obj/Debug/tizen50/Configuration.csproj.CoreCompileInputs.cache
-/home/leon/Projects/JuvoPlayer/Configuration/obj/Debug/tizen50/Configuration.dll
-/home/leon/Projects/JuvoPlayer/Configuration/obj/Debug/tizen50/Configuration.pdb

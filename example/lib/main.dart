@@ -27,7 +27,7 @@ class _App extends StatelessWidget {
       child: Scaffold(
         key: const ValueKey<String>('home_page'),
         appBar: AppBar(
-          title: const Text('Video player example'),
+          title: const Text('Player intergration example'),
           actions: <Widget>[],
           bottom: const TabBar(
             isScrollable: true,
