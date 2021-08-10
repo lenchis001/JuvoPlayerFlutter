@@ -19,14 +19,14 @@ using System;
 using System.Threading.Tasks;
 using ElmSharp;
 using JuvoPlayer.Common;
-
+using JuvoLogger;
 using JuvoPlayer.Utils;
 
 namespace JuvoPlayer.Player.EsPlayer
 {
     public class EsPlayer : IPlayer
     {
-
+        private static readonly ILogger logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         private readonly EsPlayerPacketStorage packetStorage;
         private readonly EsStreamController streamControl;
@@ -52,7 +52,7 @@ namespace JuvoPlayer.Player.EsPlayer
             }
             catch (InvalidOperationException ioe)
             {
-               
+                logger.Error(ioe, "EsPlayer failure");
                 throw ioe;
             }
         }
@@ -82,55 +82,55 @@ namespace JuvoPlayer.Player.EsPlayer
 
         public void Pause()
         {
-           
+            logger.Info("");
             streamControl.Pause();
         }
 
         public void Play()
         {
-           
+            logger.Info("");
             streamControl.Play();
         }
 
         public void Stop()
         {
-           
+            logger.Info("");
             streamControl.Stop();
         }
 
         public Task Seek(TimeSpan time)
         {
-           
+            logger.Info("");
             return streamControl.Seek(time);
         }
 
         public void Suspend()
         {
-           
+            logger.Info("");
             streamControl.Suspend();
         }
 
         public Task Resume()
         {
-           
+            logger.Info("");
             return streamControl.Resume();
         }
 
         public void SetDuration(TimeSpan duration)
         {
-           
+            logger.Info("");
             throw new NotImplementedException();
         }
 
         public void SetPlaybackRate(float rate)
         {
-           
+            logger.Info("");
             throw new NotImplementedException();
         }
 
         public Task SetStreamConfig(StreamConfig config)
         {
-           
+            logger.Info(config.StreamType().ToString());
 
             return streamControl.SetStreamConfiguration(config);
         }
@@ -171,7 +171,7 @@ namespace JuvoPlayer.Player.EsPlayer
                 if (disposing)
                 {
                     // Clean packet storage and stream controller
-                   
+                    logger.Info("StreamController and PacketStorage shutdown");
                     streamControl.Dispose();
                     packetStorage.Dispose();
                 }

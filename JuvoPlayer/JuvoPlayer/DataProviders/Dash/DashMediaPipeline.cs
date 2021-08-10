@@ -21,7 +21,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Xml;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using JuvoPlayer.Demuxers;
 using JuvoPlayer.Drms;
@@ -67,7 +67,7 @@ namespace JuvoPlayer.DataProviders.Dash
             }
         }
 
-
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         private readonly IDashClient dashClient;
         private readonly IDemuxerController demuxerController;
@@ -135,11 +135,11 @@ namespace JuvoPlayer.DataProviders.Dash
             }
             catch (TaskCanceledException ex)
             {
-
+                Logger.Warn(ex, $"{StreamType}: Doesn't schedule next segment to download");
             }
             catch (OperationCanceledException ex)
             {
-
+                Logger.Warn(ex, $"{StreamType}: Doesn't schedule next segment to download");
             }
         }
 
@@ -207,9 +207,9 @@ namespace JuvoPlayer.DataProviders.Dash
                 if (Math.Abs(currentThroughput) < 0.1)
                     return;
 
-
-
-
+                Logger.Debug("Adaptation values:");
+                Logger.Debug("  current throughput: " + currentThroughput);
+                Logger.Debug("  current stream bandwidth: " + streamToAdapt.Representation.Bandwidth.Value);
 
                 // availableStreams is sorted array by descending bandwidth
                 var stream = availableStreams.FirstOrDefault(o =>
@@ -217,7 +217,7 @@ namespace JuvoPlayer.DataProviders.Dash
 
                 if (stream.Representation.Bandwidth == streamToAdapt.Representation.Bandwidth) return;
 
-
+                Logger.Info("Changing stream to bandwidth: " + stream.Representation.Bandwidth);
                 pendingStream = stream;
             }
             finally
@@ -262,7 +262,7 @@ namespace JuvoPlayer.DataProviders.Dash
 
         private void SetStream(DashStream newStream)
         {
-
+            Logger.Info("");
             Monitor.Enter(switchStreamLock);
             try
             {
@@ -327,9 +327,9 @@ namespace JuvoPlayer.DataProviders.Dash
             {
                 currentStream = newStream;
 
-
-
-
+                Logger.Info($"{StreamType}: Dash pipeline start.");
+                Logger.Info($"{StreamType}: Media: {currentStream.Media}");
+                Logger.Info($"{StreamType}: {currentStream.Representation}");
 
                 dashClient.UpdateRepresentation(currentStream.Representation);
                 ParseDrms(currentStream.Media);
@@ -429,13 +429,13 @@ namespace JuvoPlayer.DataProviders.Dash
 
             if (newStream.Equals(currentStream))
             {
-
+                Logger.Info($"Selected stream {stream.Id} {stream.Description} already playing. Not changing.");
                 return false;
             }
 
 
             SetStream(newStream);
-
+            Logger.Info($"Stream {stream.Id} {stream.Description} set.");
             return true;
         }
 
@@ -444,7 +444,7 @@ namespace JuvoPlayer.DataProviders.Dash
             if (!pipelineStarted)
                 return;
 
-
+            Logger.Info($"{StreamType}:");
 
             // Stop demuxer and dashclient
             dashClient.Reset();
@@ -461,7 +461,7 @@ namespace JuvoPlayer.DataProviders.Dash
             if (!pipelineStarted)
                 return;
 
-
+            Logger.Info($"{StreamType}");
 
             // Stop demuxer and dashclient
             dashClient.Reset();
@@ -689,6 +689,9 @@ namespace JuvoPlayer.DataProviders.Dash
                     timeBufferDepth += portionOfSegmentDuration;
             }
 
+            Logger.Info(
+                $"Average Segment Duration: {avgSegmentDuration} Manifest Min. Buffer Time: {manifestMinBufferDepth}");
+
             return timeBufferDepth;
         }
 
@@ -703,7 +706,7 @@ namespace JuvoPlayer.DataProviders.Dash
                 bufferSize = maxBufferTime;
             else if (bufferSize < minBufferTime)
                 bufferSize = minBufferTime;
-
+            Logger.Info($"TimeBufferDepth: {bufferSize}");
 
             return bufferSize;
         }

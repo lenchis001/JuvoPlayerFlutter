@@ -22,6 +22,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using JuvoLogger;
 using JuvoPlayer.Common.Utils.IReferenceCountableExtensions;
 using JuvoPlayer.ResourceLoaders;
 
@@ -34,6 +35,8 @@ namespace JuvoPlayer.Common
 
         private readonly ConcurrentDictionary<string, SemaphoreSlim> _bitmapLoaderLocks =
             new ConcurrentDictionary<string, SemaphoreSlim>();
+
+        private readonly ILogger _logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         public async Task<SKBitmapRefCounted> GetBitmap(string path)
         {
@@ -95,10 +98,12 @@ namespace JuvoPlayer.Common
 
         private void OnCacheHit(string path)
         {
+            _logger.Debug(path);
         }
 
         private void OnCacheMiss(string path)
         {
+            _logger.Debug(path);
         }
     }
 }

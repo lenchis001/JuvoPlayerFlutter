@@ -30,6 +30,7 @@
     <Folder Include="res\icons\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\JuvoLogger.Tizen\JuvoLogger.Tizen.csproj" />
     <ProjectReference Include="..\JuvoPlayer\JuvoPlayer.csproj" />
   </ItemGroup>
   <PropertyGroup>

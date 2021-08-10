@@ -18,13 +18,13 @@
 using System;
 using System.Runtime.InteropServices;
 using FFmpegBindings.Interop;
-
+using JuvoLogger;
 
 namespace JuvoPlayer.Demuxers.FFmpeg
 {
     public class FFmpegGlue : IFFmpegGlue
     {
-
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         public void Initialize()
         {
@@ -45,14 +45,14 @@ namespace JuvoPlayer.Demuxers.FFmpeg
                         FFmpegBindings.Interop.FFmpeg.av_log_format_line(p0, level, format, vl, lineBuffer, lineSize, &printPrefix);
                         var line = Marshal.PtrToStringAnsi((IntPtr) lineBuffer);
 
-
+                        Logger.Warn(line);
                     };
                     FFmpegBindings.Interop.FFmpeg.av_log_set_callback(logCallback);
                 }
             }
             catch (Exception e)
             {
-
+                Logger.Error(e, "Could not load and register FFmpeg library");
                 throw new DemuxerException("Could not load and register FFmpeg library", e);
             }
         }

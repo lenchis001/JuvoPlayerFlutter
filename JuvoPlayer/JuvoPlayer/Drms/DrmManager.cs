@@ -21,14 +21,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JuvoPlayer.Common;
-
+using JuvoLogger;
 using Nito.AsyncEx;
 
 namespace JuvoPlayer.Drms
 {
     public class DrmManager : IDrmManager, IDisposable
     {
-
+        private readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         private readonly List<DrmDescription> clipDrmConfigurations = new List<DrmDescription>();
         private readonly ConcurrentDictionary<string, CdmInstance> cdmInstances = new ConcurrentDictionary<string, CdmInstance>();
@@ -37,7 +37,7 @@ namespace JuvoPlayer.Drms
 
         public async Task UpdateDrmConfiguration(DrmDescription drmDescription)
         {
-
+            Logger.Info("Updating DRM configuration.");
 
             using(await clipDrmConfigurationsLock.LockAsync())
             {
@@ -50,7 +50,7 @@ namespace JuvoPlayer.Drms
 
                 if (currentDescription.IsImmutable)
                 {
-
+                    Logger.Warn($"{currentDescription.Scheme} is immutable - ignoring update request");
                     return;
                 }
 
@@ -67,10 +67,10 @@ namespace JuvoPlayer.Drms
             var useGenericKey = keyIds.Count == 0;
             if (useGenericKey)
             {
-
+                Logger.Info("No keys found in initData - using entire DrmInitData with InitData as a generic key.");
                 keyIds.Add(data.InitData);
             }
-
+            Logger.Info("Keys found - getting DrmSession.");
             IDrmSession session;
             using (await clipDrmConfigurationsLock.LockAsync())
                     session = await GetCdmInstance(data).GetDrmSession(data, keyIds, clipDrmConfigurations);
@@ -90,7 +90,7 @@ namespace JuvoPlayer.Drms
                 }
                 catch (Exception e)
                 {
-
+                    Logger.Error($"Getting CDM instance failed: {e.Message}");
                     return null;
                 }
             }
@@ -118,7 +118,7 @@ namespace JuvoPlayer.Drms
             lock(drmManagerLock)
                 if (!cdmInstances.TryAdd(keySystem, cdmInstance))
                 {
-
+                    Logger.Info($"Failed to add CdmInstance for {keySystem}!");
                     throw new DrmException($"Failed to add CdmInstance for {keySystem}!");
                 }
 

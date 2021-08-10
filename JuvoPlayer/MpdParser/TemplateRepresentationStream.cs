@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using JuvoLogger;
 
 namespace MpdParser.Node.Dynamic
 {
@@ -184,6 +185,8 @@ namespace MpdParser.Node.Dynamic
         public uint Count => (uint)timeline.Count;
 
         private uint? templateDuration;
+
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger(MpdParser.LogTag);
 
         public TemplateRepresentationStream(Uri baseUrl, Template init, Template media, uint? bandwidth,
             string reprId, uint timescale, TimelineItem[] timeline,
@@ -408,6 +411,7 @@ namespace MpdParser.Node.Dynamic
             if (idx < 0)
             {
                 var last = timelineAll.Length - 1;
+                Logger.Error($"Failed to find start segment @time. FAll={timelineAll[0].Number}/{timelineAll[0].TimeScaled} T={startTime} LAll={timelineAll[last].Number}/{timelineAll[last].TimeScaled}");
                 return null;
             }
 
@@ -415,6 +419,7 @@ namespace MpdParser.Node.Dynamic
             if (timelineAll[idx].TimeToLive == TimeSpan.Zero)
             {
                 var last = timelineAll.Length - 1;
+                Logger.Error($"Start segment found {timelineAll[idx].Number} is unavailable FAll={timelineAll[0].Number}/{timelineAll[0].TimeScaled} T={startTime} TTL={timelineAll[idx].TimeToLive} LAll={timelineAll[last].Number}/{timelineAll[last].TimeScaled}");
                 return null;
             }
             return (uint?)timelineAll[idx].Number;
@@ -595,6 +600,10 @@ namespace MpdParser.Node.Dynamic
             var idx = Array.BinarySearch(timelineAll, timelineAvailable.Offset, timelineAvailable.Count,
                 lookFor, searcher);
 
+            if (idx < 0)
+                Logger.Error($"Failed to find segment @pos. FA={timeline[0].Number} Pos={segmentId} LA={timeline[(int)Count - 1].Number}");
+
+
             // Index Search is based on timelineAll. Access is done on timeline thus offset subtraction
             // In fail case, simply larger negative value will be returned.
             //
@@ -614,6 +623,10 @@ namespace MpdParser.Node.Dynamic
 
             var idx = Array.BinarySearch(timelineAll, timelineAvailable.Offset, timelineAvailable.Count,
                 lookFor, searcher);
+
+            if (idx < 0)
+                Logger.Error($"Failed to find segment in @time. FA={timeline[0].TimeScaled} Req={pointInTime} LA={timeline[(int)Count - 1].TimeScaled}");
+
 
             // Index Search is based on timelineAll. Access is done on timeline thus offset subtraction
             // In fail case, simply larger negative value will be returned.

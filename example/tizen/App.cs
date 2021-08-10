@@ -2,13 +2,15 @@
 
 namespace Runner
 {
-    public class App : FlutterApplication
+    public class App : Tizen.Applications.CoreUIApplication //FlutterApplication
     {
         protected override void OnCreate()
         {
             base.OnCreate();
 
-            GeneratedPluginRegistrant.RegisterPlugins(this);
+            JuvoPlayerWrapper.Run();
+            
+            //GeneratedPluginRegistrant.RegisterPlugins(this);
         }
 
         static void Main(string[] args)

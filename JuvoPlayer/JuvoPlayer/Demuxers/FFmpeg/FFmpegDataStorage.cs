@@ -18,14 +18,14 @@
  */
 
 using System;
-
+using JuvoLogger;
 using FFmpegBindings.Interop;
 
 namespace JuvoPlayer.Common
 {
     internal class FFmpegDataStorage : INativeDataStorage
     {
-
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         private static readonly byte[] AudioPES =
             {0xC0, 0x00, 0x00, 0x00, 0x01, 0xCE, 0x8C, 0x4D, 0x9D, 0x10, 0x8E, 0x25, 0xE9, 0xFE};
@@ -50,7 +50,7 @@ namespace JuvoPlayer.Common
             {
                 if (FFmpeg.av_grow_packet(&pkt, prependLen) < 0)
                 {
-
+                    Logger.Error("GrowPacket failed");
                     return;
                 }
                 packetSpan = new Span<byte>(pkt.data, pkt.size);

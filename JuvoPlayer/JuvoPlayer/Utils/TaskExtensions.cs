@@ -18,7 +18,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-
+using JuvoLogger;
 
 namespace JuvoPlayer.Utils
 {
@@ -77,7 +77,7 @@ namespace JuvoPlayer.Utils
             }
         }
 
-        public static async Task WithoutException(this Task task)
+        public static async Task WithoutException(this Task task, ILogger logger = null)
         {
             try
             {
@@ -85,10 +85,11 @@ namespace JuvoPlayer.Utils
             }
             catch (Exception e)
             {
+                logger?.Warn(e);
             }
         }
 
-        public static async Task<T> WithoutException<T>(this Task<T> task)
+        public static async Task<T> WithoutException<T>(this Task<T> task, ILogger logger = null)
         {
             try
             {
@@ -96,6 +97,7 @@ namespace JuvoPlayer.Utils
             }
             catch (Exception e)
             {
+                logger?.Warn(e);
             }
 
             return default;

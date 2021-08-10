@@ -17,7 +17,7 @@
 
 using System;
 using System.Collections.Generic;
-
+using JuvoLogger;
 
 namespace JuvoPlayer.Utils
 {
@@ -28,6 +28,14 @@ namespace JuvoPlayer.Utils
 
     public static class DumpTools
     {
+        public static void LineDump(this string data, ILogger logger, char lineSeparator='\n')
+        {
+            var src = data.Split(lineSeparator);
+            foreach (var t in src)
+            {
+                logger.Info(t);
+            }
+        }
 
         /// <summary>
         /// Dumps last N bytes from byte array in human readable format.

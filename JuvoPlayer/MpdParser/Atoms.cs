@@ -18,12 +18,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using JuvoLogger;
 
 namespace MpdParser.Node.Atom
 {
     public abstract class AtomBase
     {
         protected UInt32 AtomSize;
+        protected static ILogger Logger = LoggerManager.GetInstance().GetLogger(MpdParser.LogTag);
 
         public abstract void ParseAtom(byte[] adata, ulong dataStart);
 
@@ -101,6 +103,7 @@ namespace MpdParser.Node.Atom
                 case TypeCode.Single:
                 case TypeCode.String:
                 default:
+                    Logger.Warn($"{res.GetType()} Unsupported read type.");
                     break;
             }
 
@@ -229,6 +232,16 @@ namespace MpdParser.Node.Atom
 
 
             return (rl, rh, startTime, duration);
+        }
+
+        public void DumpMovieIndex(TimeSpan curr = default(TimeSpan))
+        {
+            Logger.Debug($"SIDX DB dump {Movieidx.Count} entries:");
+            foreach (Movie_index_entry mie in Movieidx)
+            {
+                Logger.Debug(
+                    $"Requested Time={curr} Index Start Time={mie.TimeIndex} Index Duration={mie.SegmentDuration} Total={mie.TimeIndex + mie.SegmentDuration}");
+            }
         }
 
         public override void ParseAtom(byte[] adata, ulong dataStart)

@@ -17,7 +17,7 @@
 
  using System;
 using System.Collections.Generic;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 
 namespace JuvoPlayer.OpenGL
@@ -60,7 +60,7 @@ namespace JuvoPlayer.OpenGL
 
         private List<StreamDescriptionsList> _streams = new List<StreamDescriptionsList>();
 
-
+        public ILogger Logger { private get; set; }
 
         public void LoadStreamLists(IPlayerService player)
         {
@@ -68,10 +68,10 @@ namespace JuvoPlayer.OpenGL
 
             if (player == null)
             {
-
+                Logger?.Error("player null, cannot load stream lists");
                 return;
             }
-
+            Logger?.Info($"loading stream lists");
 
             SubtitlesOn = false;
             foreach (var streamType in new[] { StreamType.Video, StreamType.Audio, StreamType.Subtitle })
@@ -92,7 +92,7 @@ namespace JuvoPlayer.OpenGL
             for (int id = 0; id < streamDescriptionsList.Descriptions.Count; ++id)
             {
                 var s = streamDescriptionsList.Descriptions[id];
-
+                Logger?.Info($"stream.Description=\"{s.Description}\", stream.Id=\"{s.Id}\", stream.Type=\"{s.StreamType}\", stream.Default=\"{s.Default}\"");
                 if (s.Default)
                 {
                     streamDescriptionsList.Active = id;
@@ -106,7 +106,7 @@ namespace JuvoPlayer.OpenGL
 
         private void UpdateOptionsSelection()
         {
-
+            Logger?.Info($"activeOption={_activeOption}, activeSubOption={_activeSubOption}, selectedOption={_selectedOption}, selectedSubOption={_selectedSubOption}");
             if (_selectedOption >= 0 && _selectedOption < _streams.Count)
                 _activeSubOption = _streams[_selectedOption].Active;
             DllImports.UpdateSelection(new DllImports.SelectionData()
@@ -230,7 +230,7 @@ namespace JuvoPlayer.OpenGL
                     }
                     catch (Exception e)
                     {
-
+                        Logger.Error(e);
                         if (_streams[selectedStreamTypeIndex].Descriptions[selectedStreamIndex].StreamType ==
                             StreamType.Subtitle)
                         {

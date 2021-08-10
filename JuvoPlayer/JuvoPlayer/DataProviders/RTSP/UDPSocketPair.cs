@@ -19,12 +19,15 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using JuvoLogger;
 using Rtsp;
 
 namespace JuvoPlayer.DataProviders.RTSP
 {
     internal class UDPSocketPair
     {
+        private readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
         private readonly UdpClient dataSocket = null;
         private readonly UdpClient controlSocket = null;
 
@@ -192,6 +195,7 @@ namespace JuvoPlayer.DataProviders.RTSP
 
                     // We have an RTP frame.
                     // Fire the DataReceived event with 'frame'
+                    Logger.Info("Received RTP data on port " + dataPort);
 
                     var currentMessage = new Rtsp.Messages.RtspData
                     {

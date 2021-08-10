@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using JuvoLogger;
 using JuvoPlayer.Common;
 using JuvoPlayer.Subtitles;
 
@@ -28,6 +29,7 @@ namespace JuvoPlayer.DataProviders.Dash
     internal class DashDataProvider : IDataProvider
     {
         private const string Tag = "JuvoPlayer";
+        private readonly ILogger Logger = LoggerManager.GetInstance().GetLogger(Tag);
 
         private DashMediaPipeline audioPipeline;
         private DashMediaPipeline videoPipeline;
@@ -57,6 +59,7 @@ namespace JuvoPlayer.DataProviders.Dash
 
         private async Task OnManifestReady()
         {
+            Logger.Info("");
             try
             {
                 await audioPipeline.SwitchStreamIfNeeded();
@@ -64,9 +67,11 @@ namespace JuvoPlayer.DataProviders.Dash
             }
             catch (TaskCanceledException ex)
             {
+                Logger.Warn(ex);
             }
             catch (OperationCanceledException ex)
             {
+                Logger.Warn(ex);
             }
         }
 
@@ -119,6 +124,7 @@ namespace JuvoPlayer.DataProviders.Dash
 
         public void ChangeActiveStream(StreamDescription stream)
         {
+            Logger.Info("");
 
             switch (stream.StreamType)
             {
@@ -168,6 +174,7 @@ namespace JuvoPlayer.DataProviders.Dash
 
         public void OnStopped()
         {
+            Logger.Info("");
 
             manifestProvider.Stop();
             videoPipeline.Stop();
@@ -186,6 +193,7 @@ namespace JuvoPlayer.DataProviders.Dash
 
             var audioPosition = audioPipeline.Seek(videoPosition);
 
+            Logger.Info($"Request Position {timeIndex} Video {videoPosition} Audio {audioPosition}");
 
             audioPipeline.PacketPredicate = packet => !packet.ContainsData() || packet.Pts >= videoPosition;
 
@@ -218,6 +226,7 @@ namespace JuvoPlayer.DataProviders.Dash
             var audioAvailable = audioPipeline.IsDataAvailable();
             var available = videoAvailable && audioAvailable;
 
+            Logger.Info($"Data Available: {available} Audio: {audioAvailable} Video: {videoAvailable}");
 
             return available;
         }
@@ -246,6 +255,7 @@ namespace JuvoPlayer.DataProviders.Dash
 
         public void Start()
         {
+            Logger.Info("");
 
             manifestProvider.Start();
         }
@@ -256,6 +266,7 @@ namespace JuvoPlayer.DataProviders.Dash
         {
             if (disposed)
             {
+                Logger.Info("Ignoring Time Updates");
                 return;
             }
 

@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using static JuvoPlayer.Utils.EndianTools;
 
@@ -28,7 +28,7 @@ namespace JuvoPlayer.Drms
 {
     internal static class DrmInitDataTools
     {
-
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         // Master KeyID is used as internal identifier of session which apply to entire
         // content but don't have any key ids defined.
@@ -63,7 +63,7 @@ namespace JuvoPlayer.Drms
                 var kids = xDoc.Descendants(xDoc.Root.Name.Namespace + "KID");
                 foreach (XElement kid in kids)
                 {
-
+                    Logger.Info(kid.Value);
                     // PlayReady KeyIds are in LE format. (each uuid block)
                     // Pssh box KeyIds are in BE format
                     //
@@ -121,7 +121,7 @@ namespace JuvoPlayer.Drms
                 var uuid = new byte[16];
                 Array.ConstrainedCopy(pssh, offset, uuid, 0, 16);
                 offset += 16;
-
+                Logger.Info(KeyToUuid(uuid));
                 yield return uuid;
             }
         }
@@ -136,12 +136,12 @@ namespace JuvoPlayer.Drms
                 switch (initData.DataType)
                 {
                     case DrmInitDataType.MsPrPro:
-
+                        Logger.Info(initData.DataType.ToString());
                         initDataSource = MicrosoftPlayReadyObjectHeader(initData.InitData);
                         break;
 
                     case DrmInitDataType.Pssh:
-
+                        Logger.Info(initData.DataType.ToString());
                         initDataSource = PsshBox(initData.InitData);
                         break;
 
@@ -154,7 +154,7 @@ namespace JuvoPlayer.Drms
             {
                 // Init data seems malformed. May still usable by underlying decryption mechanisms.
                 // Try processing what's available
-
+                Logger.Warn("Possibly malformed DrmInitData.initData");
                 initDataSource = Enumerable.Empty<byte[]>();
             }
             

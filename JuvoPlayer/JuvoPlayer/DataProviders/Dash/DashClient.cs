@@ -25,6 +25,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Configuration;
+using JuvoLogger;
 using JuvoPlayer.Common;
 using MpdParser.Node;
 using MpdParser.Node.Dynamic;
@@ -42,6 +43,8 @@ namespace JuvoPlayer.DataProviders.Dash
         }
 
         private const string Tag = "JuvoPlayer";
+
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger(Tag);
 
         private readonly IThroughputHistory throughputHistory;
         private readonly StreamType streamType;
@@ -149,6 +152,9 @@ namespace JuvoPlayer.DataProviders.Dash
                 request += firstSegmentClock;
 
             // Reduce message output to changed end clock.
+            if (request != _dataClockLimit)
+                LogInfo($"Data clock update: {_dataClockLimit}->{request}");
+
             _dataClockLimit = request;
             ScheduleNextSegDownload();
         }
@@ -170,6 +176,7 @@ namespace JuvoPlayer.DataProviders.Dash
             // Termination will occur after restarting
             if (seekToTimeRange == null)
             {
+                LogError($"Seek Pos Req: {position} failed. No segment/TimeRange found");
                 throw new ArgumentOutOfRangeException();
             }
 
@@ -180,6 +187,9 @@ namespace JuvoPlayer.DataProviders.Dash
             // Clear dataClockLimit. Download will start after new dataClockLimit is
             // received.
             _dataClockLimit = TimeSpan.Zero;
+
+            LogInfo(
+                $"Seek Pos Req: {position} Seek to: ({seekToTimeRange.Start}-{seekToTimeRange.Start + seekToTimeRange.Duration}/{currentTime}) SegId: {currentSegmentId}");
 
             return seekToTimeRange.Start;
         }
@@ -216,6 +226,7 @@ namespace JuvoPlayer.DataProviders.Dash
             if (currentStreams.InitSegment == null)
                 initInProgress = false;
 
+            LogInfo($"{streamType}: Started");
             ScheduleNextSegDownload();
         }
 
@@ -229,6 +240,7 @@ namespace JuvoPlayer.DataProviders.Dash
             if (_dataClockLimit >= bufferTime + currentChunk)
                 return true;
 
+            LogInfo($"Full. BufferTime {bufferTime} Max {_dataClockLimit} Chunk {currentChunk} ({bufferTime - currentTime})");
 
             return false;
         }
@@ -237,6 +249,7 @@ namespace JuvoPlayer.DataProviders.Dash
         {
             if (IsEndOfContent(bufferTime))
             {
+                LogInfo("End of content");
                 // DashClient termination. This may be happening as part of scheduleDownloadNextTask.
                 // Clear reference held in scheduleDownloadNextTask to prevent Stop() from trying to wait
                 // for itself. Otherwise DashClient will try to chase its own tail (deadlock)
@@ -270,9 +283,11 @@ namespace JuvoPlayer.DataProviders.Dash
 
             if (segment == null)
             {
+                LogInfo($"Segment: [{currentSegmentId}] NULL stream");
                 if (IsDynamic)
                     return;
 
+                LogWarn("Stopping player");
 
                 // Generate EOS asap
                 StopAsync();
@@ -312,6 +327,7 @@ namespace JuvoPlayer.DataProviders.Dash
 
         private DownloadLoopStatus HandleCancelledDownload(CancellationToken token)
         {
+            LogInfo($"Segment: download cancelled. Continue? {!cancellationTokenSource.IsCancellationRequested}");
 
             // if download was cancelled by timeout cancellation token than reschedule download
             return token.IsCancellationRequested == false ? DownloadLoopStatus.Continue : DownloadLoopStatus.GiveUp;
@@ -319,6 +335,7 @@ namespace JuvoPlayer.DataProviders.Dash
 
         private void DownloadInitSegment(Segment segment, bool initReloadRequired)
         {
+            LogInfo($"Forcing INIT segment reload: {initReloadRequired}");
 
             // Grab a copy (its a struct) of cancellation token so it is not referenced through cancellationTokenSource each time.
             var cancelToken = cancellationTokenSource.Token;
@@ -358,6 +375,7 @@ namespace JuvoPlayer.DataProviders.Dash
                 downloadCompletedTask = processDataTask.ContinueWith(
                     _ =>
                     {
+                        LogInfo("Init Done. Poking downloadCompleted");
                         readySubject.OnNext(Unit.Default);
                     },
                     TaskContinuationOptions.OnlyOnRanToCompletion);
@@ -365,6 +383,7 @@ namespace JuvoPlayer.DataProviders.Dash
             else
             {
                 // Already have init segment. Push it down the pipeline & schedule next download
+                LogInfo("Segment: INIT Reusing already downloaded data");
                 foreach (var chunk in initStreamBytes)
                     chunkReadySubject.OnNext(chunk);
                 InitDataDownloaded();
@@ -387,18 +406,21 @@ namespace JuvoPlayer.DataProviders.Dash
             currentSegmentId = currentStreams.NextSegmentId(currentSegmentId);
 
             var timeInfo = segment.Period.ToString();
+            LogInfo($"Segment: {responseResult.SegmentId} enqueued {timeInfo}");
 
             return DownloadLoopStatus.Continue;
         }
 
         private void InitDataDownloaded()
         {
+            LogInfo("Segment: INIT enqueued.");
             initInProgress = false;
         }
 
         private DownloadLoopStatus HandleFailedDownload(Task response)
         {
             var errorMessage = GetErrorMessage(response);
+            LogError(errorMessage);
             var exception = response.Exception?.Flatten().InnerExceptions[0] as DashDownloaderException;
             if (IsDynamic)
             {
@@ -418,6 +440,7 @@ namespace JuvoPlayer.DataProviders.Dash
 
         private void HandleFailedInitDownload(string message)
         {
+            LogError(message);
             initInProgress = false;
             StopAsync();
             errorSubject.OnNext(message);
@@ -441,6 +464,7 @@ namespace JuvoPlayer.DataProviders.Dash
             WaitForTaskCompletionNoError(downloadCompletedTask);
             WaitForTaskCompletionNoError(downloadDataTask);
             WaitForTaskCompletionNoError(processDataTask);
+            LogInfo("Data downloader stopped");
         }
 
         private static void WaitForTaskCompletionNoError(Task task)
@@ -475,6 +499,7 @@ namespace JuvoPlayer.DataProviders.Dash
         public void UpdateRepresentation(Representation representation)
         {
             Interlocked.Exchange(ref newRepresentation, representation);
+            LogInfo("newRepresentation set");
         }
 
         /// <summary>
@@ -508,6 +533,7 @@ namespace JuvoPlayer.DataProviders.Dash
             {
                 currentSegmentId = currentRepresentation.Segments.StartSegmentId();
                 firstSegmentClock = currentStreams.SegmentTimeRange(currentSegmentId).Start;
+                LogInfo($"Rep. Swap. Start Seg: [{currentSegmentId}]");
                 return;
             }
 
@@ -523,7 +549,11 @@ namespace JuvoPlayer.DataProviders.Dash
                 message = "Not Found. Setting segment to null";
             }
 
+            LogInfo(
+                $"Rep. Swap. Last Seg: {currentSegmentId}/{lastDownloadSegmentTimeRange.Start}-{lastDownloadSegmentTimeRange.Duration} {message}");
             currentSegmentId = newSeg;
+
+            LogInfo("Representations swapped.");
         }
 
         public void OnTimeUpdated(TimeSpan time)
@@ -555,6 +585,7 @@ namespace JuvoPlayer.DataProviders.Dash
             return Task.Run(async () =>
             {
                 var timeout = CalculateDownloadTimeout(segment);
+                Logger.Info($"Calculated download timeout is {timeout.TotalMilliseconds}");
                 var requestData = new DownloadRequest
                 {
                     DownloadSegment = segment,
@@ -613,6 +644,40 @@ namespace JuvoPlayer.DataProviders.Dash
         {
             return chunkReadySubject.AsObservable();
         }
+
+        #region Logging Functions
+
+        private void LogInfo(string logMessage, [CallerFilePath] string file = "",
+            [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Logger.Info(streamType + ": " + logMessage, file, method, line);
+        }
+
+        private void LogDebug(string logMessage, [CallerFilePath] string file = "",
+            [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Logger.Debug(streamType + ": " + logMessage, file, method, line);
+        }
+
+        private void LogWarn(string logMessage, [CallerFilePath] string file = "",
+            [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Logger.Warn(streamType + ": " + logMessage, file, method, line);
+        }
+
+        private void LogFatal(string logMessage, [CallerFilePath] string file = "",
+            [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Logger.Fatal(streamType + ": " + logMessage, file, method, line);
+        }
+
+        private void LogError(string logMessage, [CallerFilePath] string file = "",
+            [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Logger.Error(streamType + ": " + logMessage, file, method, line);
+        }
+
+        #endregion
 
         #region IDisposable Support
 

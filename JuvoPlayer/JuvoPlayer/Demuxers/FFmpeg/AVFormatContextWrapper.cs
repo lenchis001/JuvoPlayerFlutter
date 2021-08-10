@@ -22,7 +22,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using FFmpegBindings.Interop;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using JuvoPlayer.Drms;
 
@@ -30,7 +30,7 @@ namespace JuvoPlayer.Demuxers.FFmpeg
 {
     public unsafe class AVFormatContextWrapper : IAVFormatContext
     {
-
+        private static ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         private AVFormatContext* formatContext;
         private AVIOContextWrapper avioContext;
@@ -156,7 +156,7 @@ namespace JuvoPlayer.Demuxers.FFmpeg
                 var stringValue = Marshal.PtrToStringAnsi((IntPtr)dict->value);
                 if (!ulong.TryParse(stringValue, out var value))
                 {
-
+                    Logger.Error($"Expected to received an ulong, but got {stringValue}");
                     continue;
                 }
 

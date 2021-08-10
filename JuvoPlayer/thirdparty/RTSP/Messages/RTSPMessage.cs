@@ -1,4 +1,5 @@
-﻿
+﻿using JuvoLogger;
+
 namespace Rtsp.Messages
 {
     using System;
@@ -11,6 +12,8 @@ namespace Rtsp.Messages
 
     public class RtspMessage : RtspChunk
     {
+        private static readonly ILogger _logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
         /// <summary>
         /// The regex to validate the Rtsp message.
         /// </summary>
@@ -38,11 +41,13 @@ namespace Rtsp.Messages
                     returnValue = new RtspResponse();
                 else
                 {
+                    _logger.Warn($"Got a strange message {aRequestLine}");
                     returnValue = new RtspMessage();
                 }
             }
             else
             {
+                _logger.Warn($"Got a strange message {aRequestLine}");
                 returnValue = new RtspMessage();
             }
             returnValue.Command = aRequestLine;
@@ -135,7 +140,7 @@ namespace Rtsp.Messages
             }
             else
             {
-                //Invalid Header received
+                _logger.Warn($"Invalid Header received : -{line}-");
             }
         }
 
@@ -251,6 +256,26 @@ namespace Rtsp.Messages
 
             }
             stream.Flush();
+        }
+
+
+
+        /// <summary>
+        /// Logs the message.
+        /// </summary>
+        /// <param name="aLevel">A log level.</param>
+        public override void LogMessage()
+        {
+            _logger.Info($"Commande : {Command}");
+            foreach (KeyValuePair<string, string> item in _headers)
+            {
+                _logger.Info($"Header : {item.Key}: {item.Value}");
+            }
+
+            if (Data.Length > 0)
+            {
+                _logger.Info($"Data :-{ASCIIEncoding.ASCII.GetString(Data)}-");
+            }
         }
 
         /// <summary>

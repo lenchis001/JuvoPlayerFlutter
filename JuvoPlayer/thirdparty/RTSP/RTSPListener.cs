@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using JuvoLogger;
 using System.Reactive.Subjects;
 
 namespace Rtsp
@@ -19,6 +20,8 @@ namespace Rtsp
     /// </summary>
     public class RtspListener : IDisposable
     {
+        private static readonly ILogger _logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
         private IRtspTransport _transport;
 
         private Task _listenTask;
@@ -70,6 +73,7 @@ namespace Rtsp
                 {
                     _rtspErrorSubject?.OnNext(task.Exception.Message);
                 }
+                _logger.Info("RTPS Listen Task completed.");
             });
             _listenTask.Start();
         }
@@ -136,6 +140,8 @@ namespace Rtsp
         {
             try
             {
+                _logger.Info($"RTSP Connection with {_transport.RemoteAddress} started");
+
                 // token & _transport determine object's status
                 while (!token.IsCancellationRequested && _transport?.Connected == true)
                 {
@@ -147,6 +153,9 @@ namespace Rtsp
                         if (!(currentMessage is RtspData))
                         {
                             // on logue le tout
+                            if (currentMessage.SourcePort != null)
+                                _logger.Info($"Receive from {currentMessage.SourcePort.RemoteAdress}");
+                            currentMessage.LogMessage();
                         }
 
                         if (currentMessage is RtspResponse)
@@ -164,7 +173,7 @@ namespace Rtsp
                                 }
                                 else
                                 {
-                                    //Receive response not asked {response.CSeq}
+                                    _logger.Warn($"Receive response not asked {response.CSeq}");
                                 }
                             }
 
@@ -188,6 +197,7 @@ namespace Rtsp
             }
             catch (OperationCanceledException)
             {
+                _logger.Info("Operation canceled");
                 _stream.Close();
             }
             // Don't report IO/Socket errors when canceled.
@@ -195,25 +205,30 @@ namespace Rtsp
             catch (IOException error)
             when (!token.IsCancellationRequested)
             {
+                _logger.Error("IO Error" + error);
                 _stream.Close();
                 throw;
             }
             catch (SocketException error)
             when (!token.IsCancellationRequested)
             {
+                _logger.Error("Socket Error" + error);
                 _stream.Close();
                 throw;
             }
             catch (ObjectDisposedException error)
             {
+                _logger.Error("Object Disposed" + error);
                 throw;
             }
             catch (Exception error)
             {
+                _logger.Error("Unknown Error" + error);
                 throw;
             }
             finally
             {
+                _logger.Info($"RTSP Connection with {_transport.RemoteAddress} terminated");
             }
         }
 
@@ -244,6 +259,7 @@ namespace Rtsp
                 if (!AutoReconnect)
                     return false;
 
+                _logger.Warn("Reconnect to a client, strange !!");
                 try
                 {
                     Reconnect();
@@ -271,6 +287,8 @@ namespace Rtsp
                 }
             }
 
+            _logger.Info("Send Message");
+            message.LogMessage();
             message.SendTo(_transport.GetStream());
             return true;
         }
@@ -399,6 +417,7 @@ namespace Rtsp
                                 break;
                             }
                             byteReaden += byteCount;
+                            _logger.Info($"Read {byteReaden} byte of data");
                         }
                         // if we haven't read all go there again else go to end.
                         if (byteReaden >= currentMessage.Data.Length)
@@ -490,6 +509,7 @@ namespace Rtsp
                 if (!AutoReconnect)
                     return null; // cannot write when transport is disconnected
 
+                _logger.Warn("Reconnect to a client, strange !!");
                 Reconnect();
             }
 
@@ -515,6 +535,7 @@ namespace Rtsp
             catch (Exception e)
             {
                 // Error, for example stream has already been Disposed
+                _logger.Warn("Error during end send (can be ignored) " + e);
                 result = null;
             }
         }
@@ -537,6 +558,7 @@ namespace Rtsp
                 if (!AutoReconnect)
                     throw new Exception("Connection is lost");
 
+                _logger.Warn("Reconnect to a client, strange !!");
                 Reconnect();
             }
 

@@ -22,7 +22,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using JuvoPlayer.Utils;
 using static Configuration.DataSynchronizerConfig;
@@ -66,7 +66,7 @@ namespace JuvoPlayer.Player.EsPlayer
             }
         }
 
-
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
         private readonly SynchronizationData[] _streamSyncData = new SynchronizationData[(int)StreamType.Count];
         private readonly AsyncBarrier<bool> _streamSyncBarrier = new AsyncBarrier<bool>();
         private readonly PlayerClockProvider _playerClockSource;
@@ -98,7 +98,7 @@ namespace JuvoPlayer.Player.EsPlayer
 
             if (targetClock - playerClock >= MinimumDelayDuration)
             {
-
+                Logger.Info($"{streamState.StreamType}: Pts {streamState.Pts} to {playerClock} resume {targetClock}");
 
                 return _playerClockSource.PlayerClockObservable()
                     .FirstAsync(pClock => pClock >= targetClock)
@@ -113,7 +113,7 @@ namespace JuvoPlayer.Player.EsPlayer
             var delay = streamState.Pts - referencePosition - StreamClockMaximumOverhead;
             if (delay >= MinimumDelayDuration)
             {
-
+                Logger.Info($"{streamState.StreamType}: Pts {streamState.Pts} Reference {referencePosition} Delay {delay}");
                 return Task.Delay(delay, token);
             }
 
@@ -154,7 +154,7 @@ namespace JuvoPlayer.Player.EsPlayer
                     // switch to player clock sync when all streams see it running.
                     if (streamMsg.All(msg => msg))
                     {
-
+                        Logger.Info($"{streamState.StreamType}: Clock started {_playerClockSource.Clock}");
                         _streamSyncBarrier.RemoveParticipant();
                         streamState.SyncState = SynchronizationState.PlayerClockSynchronize;
                         return;
@@ -179,7 +179,7 @@ namespace JuvoPlayer.Player.EsPlayer
                 if (!(packet is EOSPacket))
                     return;
 
-
+                Logger.Info($"{streamState.StreamType}: '{streamState.SyncState}' EOS {streamState.Pts}");
 
                 if (streamState.SyncState != SynchronizationState.PlayerClockSynchronize)
                     _streamSyncBarrier.RemoveParticipant();
@@ -190,7 +190,8 @@ namespace JuvoPlayer.Player.EsPlayer
             streamState.Pts = packet.Pts;
 
             // First packet starts the show.
-            Interlocked.CompareExchange(ref _syncClock, new RunningTime(packet.Pts), null);
+            if (_syncClock == null && Interlocked.CompareExchange(ref _syncClock, new RunningTime(packet.Pts), null) == null)
+                Logger.Info($"{packet.StreamType}: Sync clock offset {_syncClock.Offset}");
         }
 
         public void Prepare()
@@ -209,7 +210,7 @@ namespace JuvoPlayer.Player.EsPlayer
                 _streamSyncBarrier.AddParticipant();
             }
 
-
+            Logger.Info("");
         }
 
         public IObservable<TimeSpan> Pts()
@@ -219,7 +220,7 @@ namespace JuvoPlayer.Player.EsPlayer
 
         public void Dispose()
         {
-
+            Logger.Info("");
             _ptsSubject.OnCompleted();
             _ptsSubject.Dispose();
             _streamSyncBarrier.Reset();

@@ -26,7 +26,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using JuvoPlayer.Common.Utils.IReferenceCountableExtensions;
 using JuvoPlayer.Utils;
@@ -40,7 +40,7 @@ namespace JuvoPlayer.Drms
 {
     public class CdmInstance : IEventListener, ICdmInstance
     {
-
+        private readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         public string KeySystem { get; }
         public EmeUtils.DrmType DrmType { get; }
@@ -58,11 +58,11 @@ namespace JuvoPlayer.Drms
         private readonly AsyncContextThread thread = new AsyncContextThread();
 
         public CdmInstance(string keySystem)
-        {
+        {   
             cdmInstance = IEME.create(this, keySystem, false, CDM_MODEL.E_CDM_MODEL_DEFAULT);
             if (cdmInstance == null)
             {
-
+                Logger.Error($"Cannot create CDM instance for key system ${keySystem}!");
                 throw new DrmException($"Cannot create CDM instance for key system ${keySystem}!");
             }
 
@@ -81,26 +81,26 @@ namespace JuvoPlayer.Drms
             }
             catch (Exception e)
             {
-
+                Logger.Error(e);
                 return null;
             }
         }
 
         private async Task<IDrmSession> CreateDrmSession(DrmInitData initData, IEnumerable<byte[]> keys, List<DrmDescription> clipDrmConfigurations)
         {
-
+            Logger.Warn("Creating new DRM session.");
             var scheme = EmeUtils.GetScheme(initData.SystemId);
             var drmDescription = clipDrmConfigurations.FirstOrDefault(o => SchemeEquals(o.Scheme, scheme));
             if (drmDescription == null)
             {
-
+                Logger.Warn("DRM not configured.");
                 throw new DrmException("DRM not configured.");
             }
 
             var iemeKeySystemName = EmeUtils.GetKeySystemName(initData.SystemId);
             if (IEME.isKeySystemSupported(iemeKeySystemName) != Status.kSupported)
             {
-
+                Logger.Warn($"Key System: {iemeKeySystemName} is not supported");
                 throw new DrmException($"Key System: {iemeKeySystemName} is not supported");
             }
 
@@ -113,7 +113,7 @@ namespace JuvoPlayer.Drms
             }
             catch (Exception e)
             {
-
+                Logger.Error($"EME session creation fail: {e}");
                 SessionInitializingDone();
                 CloseSession(session.GetSessionId());
                 session.Release();
@@ -144,7 +144,7 @@ namespace JuvoPlayer.Drms
             var status = cdmInstance.session_create(SessionType.kTemporary, ref sessionId);
             if (status != Status.kSuccess)
                 throw new DrmException(EmeStatusConverter.Convert(status));
-
+            Logger.Info($"Created session: {sessionId}");
             return sessionId;
         }
 
@@ -154,10 +154,10 @@ namespace JuvoPlayer.Drms
                 foreach (var session in sessionsByIds.Values)
                     if (keys.Any(key => session.GetKeys().Contains(key, new SessionKeyComparer())))
                     {
-
+                        Logger.Info("Cached session found.");
                         return session;
                     }
-
+            Logger.Info("Cached session not found.");
             return null;
         }
 
@@ -169,7 +169,7 @@ namespace JuvoPlayer.Drms
 
         public override void onMessage(string sessionId, MessageType messageType, string message)
         {
-
+            Logger.Info($"Got IEME message for session {sessionId}: {messageType}");
             switch (messageType)
             {
                 // From EME spec: A message of type "license-request" or "individualization-request" will always be queued if the generateRequest algorithm succeeds and the promise is resolved.
@@ -179,14 +179,14 @@ namespace JuvoPlayer.Drms
                         _ = RunContinueSessionInitializationOnIemeThread(sessionId, message);
                     break;
                 case MessageType.kLicenseAlreadyDone:
-
+                    Logger.Warn($"Licence already installed for session {sessionId}");
                     if(!TryGetSession(sessionId, out var session) || session == null)
-
+                        Logger.Info("Cannot find session for already installed licence - cannot mark it as initialized!");
                     session?.SetLicenceInstalled();
                     SessionInitializingDone();
                     break;
                 default:
-
+                    Logger.Warn($"[!] Unknown IEME message: {messageType}");
                     break;
             }
         }
@@ -215,7 +215,7 @@ namespace JuvoPlayer.Drms
             }
             catch (Exception e)
             {
-
+                Logger.Error($"{e}");
             }
         }
 
@@ -224,7 +224,7 @@ namespace JuvoPlayer.Drms
             TryGetSession(sessionId, out var session);
             var responseText = await AcquireLicenceFromServer(session,
                 Encoding.GetEncoding(437).GetBytes(requestResponseMessage));
-
+            Logger.Info($"Acquired license request response for session {sessionId}.");
             InstallLicence(session, responseText);
             SessionInitializingDone();
         }
@@ -235,7 +235,7 @@ namespace JuvoPlayer.Drms
             var licenceUrl = new Uri(drmDescription.LicenceUrl);
             HttpClient httpClient = new HttpClient(new RetryHandler(new HttpClientHandler()));
             httpClient.BaseAddress = licenceUrl;
-
+            Logger.Info(licenceUrl.AbsoluteUri);
             HttpContent content = new ByteArrayContent(requestData);
             content.Headers.ContentLength = requestData.Length;
             if (drmDescription.KeyRequestProperties != null)
@@ -268,12 +268,12 @@ namespace JuvoPlayer.Drms
 
         public override void onKeyStatusesChange(string sessionId)
         {
-
+            Logger.Info($"Got IEME KeyStatusesChange for {sessionId}");
         }
 
         public override void onRemoveComplete(string sessionId)
         {
-
+            Logger.Info($"Got IEME RemoveComplete for {sessionId}");
         }
 
         private void SessionInitializing()
@@ -318,10 +318,10 @@ namespace JuvoPlayer.Drms
                 }
             }
 
-
+            Logger.Info($"Install MediaKeySession {sessionId} result: {status}");
             if (status != Status.kSuccess)
             {
-
+                Logger.Error($"License Installation failure {EmeStatusConverter.Convert(status)}");
                 throw new DrmException(EmeStatusConverter.Convert(status));
             }
         }
@@ -366,7 +366,7 @@ namespace JuvoPlayer.Drms
                 };
             }
 
-
+            Logger.Error($"Decryption failed: {packet.StreamType} - {ret}");
             throw new DrmException($"Decryption failed: {packet.StreamType} - {ret}");
         }
 
@@ -422,7 +422,7 @@ namespace JuvoPlayer.Drms
             for (var errorCount = 0; (int)res == E_DECRYPT_BUFFER_FULL && errorCount < MaxDecryptRetries; ++errorCount)
             {
                 token.ThrowIfCancellationRequested();
-
+                Logger.Warn($"{type}: E_DECRYPT_BUFFER_FULL ({errorCount}/{MaxDecryptRetries})");
                 Task.Delay(DecryptBufferFullSleepTime, token).Wait(token);
                 res = API.EmeDecryptarray((eCDMReturnType)GetDecryptor(), ref param, param.Length, IntPtr.Zero, 0, ref pHandleArray);
             }
@@ -457,7 +457,7 @@ namespace JuvoPlayer.Drms
         {
             lock (cdmInstanceLock)
             {
-
+                Logger.Info($"Closing session {sessionId}.");
                 if (cdmInstance == null || sessionId == null || !sessionsByIds.ContainsKey(sessionId))
                     return;
                 try
@@ -467,7 +467,7 @@ namespace JuvoPlayer.Drms
                 }
                 catch (Exception e)
                 {
-
+                    Logger.Error(e.ToString());
                 }
                 finally
                 {
@@ -479,7 +479,7 @@ namespace JuvoPlayer.Drms
 
         private void CloseAllSessions()
         {
-
+            Logger.Info($"Closing all sessions for CDM {KeySystem}.");
             if (cdmInstance == null)
                 return;
 
@@ -512,7 +512,7 @@ namespace JuvoPlayer.Drms
         {
             if (isDisposed)
             {
-
+                Logger.Error("CdmInstance is already disposed!");
                 throw new ObjectDisposedException("CdmInstance is already disposed!");
             }
         }

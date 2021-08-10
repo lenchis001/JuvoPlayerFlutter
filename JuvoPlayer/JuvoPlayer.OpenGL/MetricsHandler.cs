@@ -97,6 +97,7 @@ namespace JuvoPlayer.OpenGL
             DllImports.SetGraphVisibility(DllImports.FpsGraphId, _metricsShown ? 1 : 0);
             foreach(Metric metric in _metrics)
                 DllImports.SetGraphVisibility(metric.Id, _metricsShown ? 1 : 0);
+            DllImports.SetLogConsoleVisibility(_metricsShown ? 1 : 0);
         }
     }
 }

@@ -15,7 +15,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using MpdParser;
 using System;
@@ -39,7 +39,7 @@ namespace JuvoPlayer.DataProviders.Dash
     internal class DashManifestProvider : IDisposable
     {
         private const string Tag = "JuvoPlayer";
-
+        private readonly ILogger logger = LoggerManager.GetInstance().GetLogger(Tag);
 
         private readonly Subject<string> streamErrorSubject = new Subject<string>();
         private readonly Subject<TimeSpan> clipDurationSubject = new Subject<TimeSpan>();
@@ -93,7 +93,7 @@ namespace JuvoPlayer.DataProviders.Dash
         {
             if (reloadDelay != TimeSpan.Zero)
             {
-               
+                logger.Info($"Manifest reload in {reloadDelay}");
                 await Task.Delay(reloadDelay, token);
             }
 
@@ -114,12 +114,16 @@ namespace JuvoPlayer.DataProviders.Dash
             var tmpPeriod = Manifest.CurrentDocument.FindPeriod(wallClock);
 
             // If no period has been found, continue reloading until a valid period has been found, regardless of static/dynamic content
+            if (tmpPeriod == null)
+                logger.Warn($"Failed to find period for WallClock {wallClock}");
+
+
             return tmpPeriod;
         }
 
         private void ProcessManifest(CancellationToken token)
         {
-           
+            logger.Info("Processing started.");
 
             var tmpPeriod = GetPeriod(token);
             if (tmpPeriod == null)
@@ -131,8 +135,12 @@ namespace JuvoPlayer.DataProviders.Dash
                 return;
             }
 
+            logger.Info("tmpPeriod is ok.");
+
             if (!Manifest.HasChanged)
                 return;
+
+            logger.Info("Manifest is not changed.");
 
             // Set period with Manifest Parameters. Will be applied to ALL media within period.
             //
@@ -140,9 +148,16 @@ namespace JuvoPlayer.DataProviders.Dash
             {
                 PlayClock = Manifest.CurrentDocument.WallClock(CurrentTime)
             };
+            
+            logger.Info("Manifest params are ready.");
+            logger.Info("tmpPeriod.Sets is null: " + (tmpPeriod.Sets == null));
+            logger.Info("tmpPeriod.Sets amount: " + tmpPeriod.Sets.Length);
+
 
             tmpPeriod.SetManifestParameters(manifestParams);
+            logger.Info("Manifest params are set.");
             tmpPeriod.Initialize(token);
+            logger.Info("Initialized.");
 
             // Apply new manifest
             //
@@ -154,17 +169,24 @@ namespace JuvoPlayer.DataProviders.Dash
             // Manageable errors will be notified by ArgumentException and handled by the caller.
             //
             SetAdaptationSetFromPeriod(tmpPeriod, token);
+            logger.Info("Adaptation period is set.");
             NotifyDurationChange();
+            logger.Info("Notified.");
             BuildSubtitleInfos(tmpPeriod);
+            logger.Info("Subtitles info is build.");
             token.ThrowIfCancellationRequested();
+            logger.Info("It look like cancelation was not requested.");
             manifestReadySubject.OnNext(Unit.Default);
+            logger.Info("OnNext was called.");
+            
+            logger.Info("Processing finished.");
         }
 
         private void NotifyDurationChange()
         {
             var duration = Manifest.CurrentDocument.MediaPresentationDuration;
 
-           
+            logger.Info($"{duration}");
             if (duration.HasValue && duration.Value > TimeSpan.Zero)
                 clipDurationSubject.OnNext(duration.Value);
         }
@@ -175,14 +197,14 @@ namespace JuvoPlayer.DataProviders.Dash
             if (manifestFeedTask == null)
                 return;
 
-           
+            logger.Info("Terminating");
             manifestFeedCts?.Cancel();
 
             try
             {
                 if (manifestFeedTask?.Status > TaskStatus.Created)
                 {
-                   
+                    logger.Info($"Awaiting manifestTask completion {manifestFeedTask?.Status}");
                     manifestFeedTask?.Wait();
                 }
             }
@@ -194,7 +216,7 @@ namespace JuvoPlayer.DataProviders.Dash
                 manifestFeedCts?.Dispose();
                 manifestFeedCts = null;
                 manifestFeedTask = null;
-               
+                logger.Info("Terminated.");
             }
         }
 
@@ -208,8 +230,11 @@ namespace JuvoPlayer.DataProviders.Dash
             {
                 try
                 {
+                    logger.Info("Init ManifestFeedProcess.");
                     await LoadManifestAsync(token, currentDelay);
+                    logger.Info("LoadManifestAsync done.");
                     ProcessManifest(token);
+                    logger.Info("ProcessManifest done.");
 
                     // Dynamic content - Keep on reloading manifest
                     //
@@ -231,7 +256,7 @@ namespace JuvoPlayer.DataProviders.Dash
                 }
                 catch (OperationCanceledException)
                 {
-                   
+                    logger.Info("Manifest download cancelled");
                     repeatFeed = false;
                 }
                 catch (ArgumentException ae)
@@ -244,7 +269,7 @@ namespace JuvoPlayer.DataProviders.Dash
                     if (!repeatFeed)
                         streamErrorSubject.OnNext(ae.Message);
 
-                   
+                    logger.Warn(ae, "Failed to apply Manifest. Retrying.");
 
                     Manifest.ForceHasChangedOnNextReload();
                 }
@@ -253,7 +278,7 @@ namespace JuvoPlayer.DataProviders.Dash
                     // Report all other exceptions to screen
                     // as they silently terminate task to fail state
                     //
-                   
+                    logger.Error(e);
                     repeatFeed = false;
                 }
 
@@ -273,7 +298,7 @@ namespace JuvoPlayer.DataProviders.Dash
             if (manifestFeedTask != null)
                 return;
 
-           
+            logger.Info("Starting DashManifestProvider");
 
             // Start reloader.
             manifestFeedCts?.Dispose();
@@ -286,7 +311,7 @@ namespace JuvoPlayer.DataProviders.Dash
 
         private void SetAdaptationSetFromPeriod(Period period, CancellationToken token)
         {
-           
+            logger.Info(period.ToString());
 
             audioPipeline.UpdateMedia(period);
             token.ThrowIfCancellationRequested();

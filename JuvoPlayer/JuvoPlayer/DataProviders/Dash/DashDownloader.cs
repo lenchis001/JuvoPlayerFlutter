@@ -15,7 +15,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using System;
 using System.Diagnostics;
@@ -32,7 +32,7 @@ namespace JuvoPlayer.DataProviders.Dash
     internal class ByteRange
     {
         private static readonly string Tag = "JuvoPlayer";
-
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger(Tag);
         public long Low { get; }
         public long High { get; }
 
@@ -54,7 +54,7 @@ namespace JuvoPlayer.DataProviders.Dash
             }
             catch (Exception ex)
             {
-
+                Logger.Error(ex, "Cannot parse range");
             }
         }
 
@@ -143,7 +143,7 @@ namespace JuvoPlayer.DataProviders.Dash
     {
         private const string Tag = "JuvoPlayer";
 
-
+        private readonly ILogger Logger = LoggerManager.GetInstance().GetLogger(Tag);
 
         private CancellationToken cancellationToken;
 
@@ -194,7 +194,7 @@ namespace JuvoPlayer.DataProviders.Dash
                 }
                 catch (HttpRequestException e)
                 {
-
+                    Logger.Warn(e, $"{request.StreamType}: Segment: {segmentId}");
 
                     lastException = e;
                     cancellationToken.ThrowIfCancellationRequested();
@@ -211,7 +211,7 @@ namespace JuvoPlayer.DataProviders.Dash
                 catch (Exception e)
                 {
                     lastException = e;
-
+                    Logger.Warn(e, $"{request.StreamType}: Segment: {segmentId} {e.GetType()}");
                     ++downloadErrorCount;
                 }
             } while (!request.IgnoreError && downloadErrorCount < 3);
@@ -228,6 +228,9 @@ namespace JuvoPlayer.DataProviders.Dash
         private async Task<DownloadResponse> DownloadDataTaskAsync()
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            Logger.Info(
+                $"{request.StreamType}: Segment: {SegmentId(request.SegmentId)} Requested. URL: {request.DownloadSegment.Url} Range: {downloadRange}");
 
             using (var httpRequest = CreateHttpRequest())
             {

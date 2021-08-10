@@ -11,6 +11,11 @@ namespace Rtsp.Messages
     public abstract class RtspChunk : ICloneable
     {
         /// <summary>
+        /// Logs the message.
+        /// </summary>
+        public abstract void LogMessage();
+
+        /// <summary>
         /// Gets or sets the data associate with the message.
         /// </summary>
         /// <value>Array of byte transmit with the message.</value>

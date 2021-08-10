@@ -21,6 +21,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using JuvoLogger;
 using MpdParser.Network;
 using MpdParser.Node.Atom;
 
@@ -39,6 +40,8 @@ namespace MpdParser.Node.Dynamic
 
     internal class FMp4Indexer
     {
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
         public static async Task<IList<Segment>> Download(Segment indexSource, Uri mediaUrl, CancellationToken token)
         {
             var policy = HttpClientProvider.GetPolicySendAsync((e) =>
@@ -48,6 +51,7 @@ namespace MpdParser.Node.Dynamic
                 // result in termination
                 if (!(e is OperationCanceledException))
                 {
+                    Logger.Error($"DownloadError {e.Message}");
                     return false;
                 }
 
@@ -55,9 +59,11 @@ namespace MpdParser.Node.Dynamic
                 // Both reported as OperationCancelledException
                 if (token.IsCancellationRequested)
                 {
+                    Logger.Warn($"Download Cancelled: {indexSource.Url}");
                     return false;
                 }
 
+                Logger.Warn($"Download Timeout: {e.Message} {indexSource.Url}");
                 return true;
             });
 
@@ -79,6 +85,8 @@ namespace MpdParser.Node.Dynamic
 
                 using (var response = await policy.ExecuteAsync(() =>
                 {
+                    Logger.Info($"Download {indexSource.Url} {rangeLow}-{rangeHigh} {rangeHigh - rangeLow}");
+
                     // Watch out for https://github.com/App-vNext/Polly/issues/313
                     using (var request = new HttpRequestMessage(HttpMethod.Get, indexSource.Url))
                     {
@@ -93,6 +101,8 @@ namespace MpdParser.Node.Dynamic
                 }
 
                 var index = ProcessIndexData(rawIndexData, (ulong)rangeHigh, mediaUrl);
+
+                Logger.Info($"{index.Count} indexes {indexSource.Url}");
 
                 return index;
             }

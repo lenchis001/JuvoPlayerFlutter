@@ -21,7 +21,7 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Configuration;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using JuvoPlayer.Drms;
 using ESPlayer = Tizen.TV.Multimedia;
@@ -55,7 +55,7 @@ namespace JuvoPlayer.Player.EsPlayer
     /// </summary>
     internal class EsStream : IDisposable
     {
-
+        private readonly ILogger logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         /// Delegate holding PushConfigMethod. Different for Audio and Video
         private delegate void StreamConfigure(StreamConfig streamConfig);
@@ -104,7 +104,7 @@ namespace JuvoPlayer.Player.EsPlayer
 
         public IObservable<Type> PacketProcessed()
         {
-            return _packetProcessed.AsObservable().Do(_ => { /*Done*/ });
+            return _packetProcessed.AsObservable().Do(_ => logger.Info($"{streamType}: Packet Done"));
         }
         #region Public API
 
@@ -135,7 +135,7 @@ namespace JuvoPlayer.Player.EsPlayer
         /// <param name="newPlayer">ESPlayer</param>
         public void SetPlayer(ESPlayer.ESPlayer newPlayer)
         {
-           
+            logger.Info($"Stream type is {streamType} Player is null:" + (newPlayer == null));
             player = newPlayer;
         }
 
@@ -147,18 +147,21 @@ namespace JuvoPlayer.Player.EsPlayer
         /// </summary>
         public void SetStreamConfiguration(StreamConfig config = null)
         {
-           
+            logger.Info($"{streamType}: Using {(config == null ? "stored" : "provided")} configuration");
 
             if (config == null)
             {
+                logger.Info("config parameter is null");
                 if (Configuration == null)
                     throw new ArgumentNullException(nameof(Configuration), "Current configuration is null");
             }
             else
             {
+                logger.Info("config parameter is not null");
                 Configuration = config;
             }
 
+            logger.Info("Before call PushStreamConfig");
             PushStreamConfig(Configuration);
         }
 
@@ -184,7 +187,7 @@ namespace JuvoPlayer.Player.EsPlayer
         /// <returns></returns>
         public Task GetActiveTask()
         {
-           
+            logger.Info($"{streamType}: {activeTask.Status}");
             return activeTask;
         }
 
@@ -206,7 +209,7 @@ namespace JuvoPlayer.Player.EsPlayer
         /// </summary>
         public void DisableInput()
         {
-           
+            logger.Info($"{streamType}:");
             packetStorage.Disable(streamType);
         }
 
@@ -216,7 +219,7 @@ namespace JuvoPlayer.Player.EsPlayer
         /// </summary>
         public void EnableInput()
         {
-           
+            logger.Info($"{streamType}:");
             packetStorage.Enable(streamType);
         }
 
@@ -230,14 +233,19 @@ namespace JuvoPlayer.Player.EsPlayer
         /// <param name="streamConfig">Common.StreamConfig</param>
         private void PushAudioConfig(StreamConfig streamConfig)
         {
-           
+            logger.Info("");
             var streamInfo = streamConfig.ESAudioStreamInfo();
 
-           
+            logger.Info("Before collecting dump");
+            logger.Info(streamInfo.DumpConfig());
+            logger.Info("After collecting dump");
+            
+            logger.Info("Player is null:" + (player == null));
+            logger.Info("Player state" + player.GetState());
 
             player.SetStream(streamInfo);
 
-           
+            logger.Info($"{streamType}: Stream configuration set");
         }
 
         /// <summary>
@@ -246,15 +254,20 @@ namespace JuvoPlayer.Player.EsPlayer
         /// <param name="streamConfig">Common.StreamConfig</param>
         private void PushVideoConfig(StreamConfig streamConfig)
         {
-           
+            logger.Info("");
 
             var streamInfo = streamConfig.ESVideoStreamInfo();
 
-           
+            logger.Info("Before collecting dump");
+            logger.Info(streamInfo.DumpConfig());
+            logger.Info("After collecting dump");
+
+            logger.Info("Player is null:" + (player == null));
+            logger.Info("Player state" + player.GetState());
 
             player.SetStream(streamInfo);
 
-           
+            logger.Info($"{streamType}: Stream configuration set");
         }
 
         /// <summary>
@@ -263,12 +276,12 @@ namespace JuvoPlayer.Player.EsPlayer
         /// </summary>
         private void EnableTransfer(CancellationToken token)
         {
-           
+            logger.Info($"{streamType}:");
 
             // No cancellation requested = task not stopped
             if (!activeTask.IsCompleted)
             {
-               
+                logger.Info($"{streamType}: Already running: {activeTask.Status}");
                 return;
             }
 
@@ -285,7 +298,7 @@ namespace JuvoPlayer.Player.EsPlayer
         /// </summary>
         private void DisableTransfer()
         {
-           
+            logger.Info($"{streamType}:");
             transferCts?.Cancel();
         }
 
@@ -305,7 +318,7 @@ namespace JuvoPlayer.Player.EsPlayer
                     Configuration = bufferConfigPacket.Config;
                     if (!oldConfiguration.IsCompatible(Configuration))
                     {
-                       
+                        logger.Error($"{streamType}: Incompatible configuration");
                         playbackErrorSubject.OnNext("Incompatible configuration");
                         continueProcessing = false;
                     }
@@ -334,7 +347,7 @@ namespace JuvoPlayer.Player.EsPlayer
         /// <param name="token">CancellationToken</param>
         private async Task TransferTask(CancellationToken token)
         {
-           
+            logger.Info($"{streamType}: Started");
             _bufferingSubject.OnNext(true);
             try
             {
@@ -349,33 +362,33 @@ namespace JuvoPlayer.Player.EsPlayer
             }
             catch (InvalidOperationException e)
             {
-               
+                logger.Error(e, $"{streamType}: Stream completed");
             }
             catch (OperationCanceledException)
             {
-               
+                logger.Info($"{streamType}: Transfer cancelled");
             }
             catch (PacketSubmitException pse)
             {
-               
+                logger.Error(pse, $"{streamType}: Submit Error " + pse.SubmitStatus);
                 DisableInput();
             }
             catch (DrmException drme)
             {
-               
+                logger.Error(drme, $"{streamType}: Decrypt Error");
                 DisableInput();
                 playbackErrorSubject.OnNext("Playback Error");
             }
             catch (Exception e)
             {
                 // Dump unhandled exception. Running as a task so they will not be reported.
-               
+                logger.Error(e, $"{streamType}");
                 DisableInput();
                 playbackErrorSubject.OnNext("Playback Error");
             }
             finally
             {
-               
+                logger.Info($"{streamType}: Terminated. ");
             }
         }
 
@@ -419,6 +432,9 @@ namespace JuvoPlayer.Player.EsPlayer
             {
                 var submitStatus = player.Submit(dataPacket);
 
+                logger.Debug(
+                    $"{dataPacket.StreamType}: ({submitStatus}) PTS: {dataPacket.Pts} Duration: {dataPacket.Duration}");
+
                 if (submitStatus == ESPlayer.SubmitStatus.Success)
                     return;
 
@@ -451,12 +467,12 @@ namespace JuvoPlayer.Player.EsPlayer
             Task sessionsInitializationsTask = cdmInstance.WaitForAllSessionsInitializations(token);
             if (!sessionsInitializationsTask.IsCompleted)
             {
-               
+                logger.Info($"{streamType}: DRM Initialization incomplete");
                 _bufferingSubject.OnNext(true);
                 await sessionsInitializationsTask;
                 _bufferingSubject.OnNext(false);
 
-               
+                logger.Info($"{streamType}: DRM Initialization complete");
             }
 
             using (var decryptedPacket = await cdmInstance.DecryptPacket(dataPacket, token) as DecryptedEMEPacket)
@@ -465,6 +481,11 @@ namespace JuvoPlayer.Player.EsPlayer
                 for (;;)
                 {
                     var submitStatus = player.Submit(decryptedPacket);
+
+                    logger.Debug(
+                        $"{decryptedPacket.StreamType}: ({submitStatus}) PTS: {decryptedPacket.Pts} Duration:" +
+                        $"{decryptedPacket.Duration} Handle: {decryptedPacket.HandleSize.handle} " +
+                        $"HandleSize: {decryptedPacket.HandleSize.size}");
 
                     if (submitStatus == ESPlayer.SubmitStatus.Success)
                     {
@@ -490,7 +511,7 @@ namespace JuvoPlayer.Player.EsPlayer
         /// </exception>
         private async ValueTask PushEosPacket(EOSPacket packet, CancellationToken token)
         {
-           
+            logger.Info($"{streamType}");
 
             // Continue pushing packet till success or terminal failure
             for (; ; )
@@ -517,7 +538,7 @@ namespace JuvoPlayer.Player.EsPlayer
             switch (status)
             {
                 case ESPlayer.SubmitStatus.NotPrepared:
-                   
+                    logger.Info($"{streamType}: Packet NOT Prepared");
                     return TimeSpan.FromSeconds(1);
                 case ESPlayer.SubmitStatus.Full:
                     return TimeSpan.FromMilliseconds(500);
@@ -536,7 +557,7 @@ namespace JuvoPlayer.Player.EsPlayer
             if (isDisposed)
                 return;
 
-           
+            logger.Info($"{streamType}:");
 
             DisableInput();
             DisableTransfer();

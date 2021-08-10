@@ -19,12 +19,15 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using JuvoLogger;
 using Polly;
 
 namespace MpdParser.Network
 {
     public class ByteRange
     {
+        protected static ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
         public long Low { get; }
         public long High { get; }
 
@@ -47,6 +50,7 @@ namespace MpdParser.Network
             }
             catch (Exception ex)
             {
+                Logger.Error(ex, $"Cannot parse range \"{range}\"");
             }
         }
 

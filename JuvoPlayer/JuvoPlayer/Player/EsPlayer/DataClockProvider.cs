@@ -20,13 +20,13 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Configuration;
-
+using JuvoLogger;
 
 namespace JuvoPlayer.Player.EsPlayer
 {
     internal class DataClockProvider : IDisposable
     {
-
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
         private TimeSpan _bufferLimit = DataClockProviderConfig.TimeBufferDepthDefault;
         private TimeSpan _clock;
         private TimeSpan _synchronizerClock;
@@ -95,19 +95,19 @@ namespace JuvoPlayer.Player.EsPlayer
             _clock = TimeSpan.Zero;
             _synchronizerClock = TimeSpan.Zero;
 
-
+            Logger.Info("End");
         }
 
         public void Start()
         {
             if (_intervalConnection != null) return;
 
-
+            Logger.Info($"Clock {_clock} + Limit {_bufferLimit} = {_clock + _bufferLimit}");
 
             _intervalConnection = _intervalSource.Connect();
             _synchronizerSubscription = _synchronizerClockSource.ObserveOn(_scheduler).Subscribe(SetSynchronizerClock);
 
-
+            Logger.Info("End");
         }
 
         public void Dispose()
@@ -119,7 +119,7 @@ namespace JuvoPlayer.Player.EsPlayer
             _dataClockSubject.Dispose();
             _isDisposed = true;
 
-
+            Logger.Info("End");
         }
     }
 }

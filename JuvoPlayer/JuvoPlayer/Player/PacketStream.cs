@@ -17,7 +17,7 @@
 
 using System;
 using System.Threading.Tasks;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using JuvoPlayer.Drms;
 using Nito.AsyncEx;
@@ -33,7 +33,7 @@ namespace JuvoPlayer.Player
 
         private StreamConfig config;
         private readonly StreamType streamType;
-
+        private readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
         private bool forceDrmChange;
         private static readonly AsyncLock packetStreamLock = new AsyncLock();
 
@@ -58,7 +58,7 @@ namespace JuvoPlayer.Player
                 {
                     if (currentCdmInstance == null)
                     {
-
+                        Logger.Error($"No matching CDM Instance for stream packet of type {encPacket.StreamType}!");
                         return;
                     }
                     encPacket.CdmInstance = currentCdmInstance;
@@ -70,7 +70,7 @@ namespace JuvoPlayer.Player
 
         public void OnStreamConfigChanged(StreamConfig config)
         {
-
+            Logger.Info($"{streamType}");
 
             if (config == null)
                 throw new ArgumentNullException(nameof(config), "config cannot be null");
@@ -93,7 +93,7 @@ namespace JuvoPlayer.Player
 
         public void OnClearStream()
         {
-
+            Logger.Info($"{streamType}");
 
             currentCdmInstance = null;
             config = null;
@@ -103,7 +103,7 @@ namespace JuvoPlayer.Player
         {
             using (await packetStreamLock.LockAsync())
             {
-
+                Logger.Info($"{streamType}");
 
                 if (!forceDrmChange && currentCdmInstance != null)
                     return;
@@ -116,7 +116,7 @@ namespace JuvoPlayer.Player
                 if (newSession == null)
                     return;
 
-
+                Logger.Info($"{streamType}: New DRM session found");
                 forceDrmChange = false;
 
                 // Set new session as current & let data submitters run wild.

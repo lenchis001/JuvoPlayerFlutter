@@ -21,7 +21,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using Nito.AsyncEx;
 
@@ -40,7 +40,7 @@ namespace JuvoPlayer.Demuxers
         private IObservable<byte[]> dataSource;
         private IDisposable dataSourceSub;
         private bool isDisposed;
-
+        private ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
         private bool paused;
 
         public DemuxerController(IDemuxer demuxer)

@@ -26,6 +26,8 @@ namespace MpdParser
 {
     public class Representation
     {
+        private JuvoLogger.ILogger Logger = JuvoLogger.LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
         // REPR or ADAPTATION SET:
         public string Id { get; }
         public string Profiles { get; }
@@ -45,6 +47,10 @@ namespace MpdParser
 
         public void SetDocumentParameters(ManifestParameters docParams)
         {
+            Logger.Info("Setting document parameter.");
+            Logger.Info("Sements is null: " + (Segments == null));
+            Logger.Info("Sements type is: " + Segments.GetType());
+
             Segments.SetDocumentParameters(docParams);
         }
 
@@ -63,7 +69,9 @@ namespace MpdParser
             NumChannels = repr.NumChannels;
             SampleRate = repr.SampleRate;
 
+            Logger.Info("Before setting of Segments.");
             Segments = repr.SegmentsStream();
+            Logger.Info("After setting of Segments. Segments is null: " + (Segments == null));
 
             // Check if repr. is valid - Entries without representation
             // specification are valid too.
@@ -275,6 +283,8 @@ namespace MpdParser
 
     public class AdaptationSet
     {
+        private static JuvoLogger.ILogger Logger = JuvoLogger.LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+            
         public uint? Id { get; }
         public uint? Group { get; }
         public string Lang { get; }
@@ -287,6 +297,7 @@ namespace MpdParser
         {
             foreach (var rep in Representations)
             {
+                Logger.Info("Processing of an representation.");
                 rep.SetDocumentParameters(docParams);
             }
         }
@@ -317,6 +328,7 @@ namespace MpdParser
             Type = new MimeType(set.GetContentType() ??
                 GuessFromMimeType(set.MimeType) ??
                 GuessFromRepresentations());
+            Logger.Info("Type:" + Type);
         }
 
         public bool HasRole(MediaRole kind)
@@ -438,6 +450,8 @@ namespace MpdParser
 
     public class Period : IComparable
     {
+        private JuvoLogger.ILogger Logger = JuvoLogger.LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
         public enum Types
         {
             Unknown,
@@ -560,12 +574,15 @@ namespace MpdParser
 
         public Period(Node.Period period)
         {
+            Logger.Info("Create Period");
             Start = period.Start;
             Duration = period.Duration;
             Type = Types.Unknown;
             Sets = new AdaptationSet[period.AdaptationSets.Length];
+            Logger.Info("Sets amount:" + Sets.Length);
             for (int i = 0; i < Sets.Length; ++i)
                 Sets[i] = new AdaptationSet(period.AdaptationSets[i]);
+            Logger.Info("Period was created");
         }
 
         public override string ToString()
@@ -615,7 +632,14 @@ namespace MpdParser
         /// <param name="manifestParams"></param>
         public void SetManifestParameters(ManifestParameters manifestParams)
         {
-            Sets.ToList().ForEach(media => media.SetDocumentParameters(manifestParams));
+            var logger = JuvoLogger.LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
+            Sets.ToList().ForEach(media => {
+                logger.Info("Processing of an adaptation set.");
+                logger.Info("Adaptation set mime type: ." + media.Type.Key + "-" + media.Type.Value);
+
+                media.SetDocumentParameters(manifestParams);
+            });
         }
 
         /// <summary>
@@ -652,6 +676,8 @@ namespace MpdParser
     /// </summary>
     public class DocumentParameters
     {
+        private JuvoLogger.ILogger Logger = JuvoLogger.LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
         public bool IsDynamic { get; }
 
         public TimeSpan? MediaPresentationDuration { get; }
@@ -672,6 +698,8 @@ namespace MpdParser
             IsDynamic = aDocument.IsDynamic;
 
             //TimeSpan is a structure. "copies" by default...
+            Logger.Info("DocumentParameters. Setting MediaPresentationDuration from aDocument.MediaPresentationDuration");
+            Logger.Info("DocumentParameters. aDocument.MediaPresentationDuration:" + aDocument.MediaPresentationDuration + "aDocument.MediaPresentationDuration==null:" + (aDocument.MediaPresentationDuration == null));
             MediaPresentationDuration = aDocument.MediaPresentationDuration;
             MinBufferTime = aDocument.MinBufferTime;
             TimeShiftBufferDepth = aDocument.TimeShiftBufferDepth;
@@ -700,6 +728,8 @@ namespace MpdParser
 
     public class Document
     {
+        private JuvoLogger.ILogger Logger = JuvoLogger.LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
         public string Title { get; }
         public TimeSpan? MediaPresentationDuration { get; }
         public TimeSpan? MinBufferTime { get; }
@@ -723,6 +753,8 @@ namespace MpdParser
 
         private Document(Node.DASH dash)
         {
+            Logger.Info("Document. Setting MediaPresentationDuration from dash.MediaPresentationDuration");
+            Logger.Info("Document. dash.MediaPresentationDuration:" + dash.MediaPresentationDuration + "dash.MediaPresentationDuration==null:" + (dash.MediaPresentationDuration == null));
             MediaPresentationDuration = dash.MediaPresentationDuration;
             MinBufferTime = dash.MinBufferTime;
             MinimumUpdatePeriod = dash.MinimumUpdatePeriod;
@@ -762,9 +794,14 @@ namespace MpdParser
                     break;
             }
 
+            Logger.Info("Before building periods.");
             Periods = Period.BuildPeriods(dash.Periods, this);
+            Logger.Info("Periods were build.");
+            Logger.Info("Amount of Periods:" + Periods.Length);
 
             Array.Sort(Periods);
+
+            Logger.Info("Document:" + this.ToString());
         }
 
         public TimeSpan WallClock(TimeSpan time)
@@ -831,9 +868,22 @@ namespace MpdParser
 
         public static async Task<DASH> FromTextInternal(string manifestText, string manifestUrl)
         {
+            var logger = JuvoLogger.LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
+            logger.Info("Parsing manifest. manifestText: \n" + manifestText + "\nmanifestUrl:" + manifestUrl);
+
             Node.DASH dash = new Node.DASH(manifestUrl);
             System.IO.StringReader reader = new System.IO.StringReader(manifestText);
             await Xml.Parser.ParseAsync(reader, dash, "MPD");
+
+            logger.Info("Parsing manifest is finished.");
+            logger.Info("dash. availabilityStartTime:" + dash.AvailabilityStartTime + " AvailabilityEndTime:" + dash.AvailabilityEndTime + " maxSegmentDuration:" + dash.MaxSegmentDuration + " minBufferTime:" + dash.MinBufferTime + " minimumUpdatePeriod:" + dash.MinimumUpdatePeriod + " publishTime:" + dash.PublishTime + " timeShiftBufferDepth:" + dash.TimeShiftBufferDepth + " MediaPresentationDuration:" + dash.MediaPresentationDuration);
+
+            if(dash.MediaPresentationDuration == null) {
+                logger.Info("MediaPresentationDuration is null. Apply workaround.");
+                dash.MediaPresentationDuration = TimeSpan.FromDays(1);
+            }
+
             return dash;
         }
 

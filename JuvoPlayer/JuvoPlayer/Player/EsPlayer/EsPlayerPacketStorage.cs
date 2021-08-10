@@ -19,7 +19,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using Nito.AsyncEx;
 
@@ -45,7 +45,7 @@ namespace JuvoPlayer.Player.EsPlayer
             }
         }
 
-
+        private readonly ILogger logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         /// <summary>
         /// Data storage collection
@@ -61,7 +61,7 @@ namespace JuvoPlayer.Player.EsPlayer
         /// <param name="stream">Common.StreamType</param>
         public void Initialize(StreamType stream)
         {
-           
+            logger.Info(stream.ToString());
 
             // Create new queue in its place
             packetQueues[(int)stream] = new DataStorage(false);
@@ -128,13 +128,13 @@ namespace JuvoPlayer.Player.EsPlayer
         {
             if (!packetQueues[(int)stream].IsDisabled)
             {
-               
+                logger.Warn($"{stream}: Not disabled");
                 return;
             }
 
             packetQueues[(int)stream].IsDisabled = false;
 
-           
+            logger.Info($"{stream}");
         }
 
         #endregion
@@ -171,7 +171,7 @@ namespace JuvoPlayer.Player.EsPlayer
 
             // Reclaim memory after queue purge
             GC.Collect();
-           
+            logger.Info($"{stream}: Disposed {packetCount}/{configsDropped} data/config packets");
 
         }
 
@@ -185,7 +185,7 @@ namespace JuvoPlayer.Player.EsPlayer
             if (isDisposed)
                 return;
 
-           
+            logger.Info("");
             for (var i = (StreamType)0; i < StreamType.Count; i++)
                 EmptyQueue(i);
 

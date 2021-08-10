@@ -20,7 +20,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-
+using JuvoLogger;
 using Configuration;
 
 namespace JuvoPlayer.Player.EsPlayer
@@ -29,7 +29,7 @@ namespace JuvoPlayer.Player.EsPlayer
 
     internal class PlayerClockProvider : IDisposable
     {
-
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         private PlayerClockFn _playerClock = InvalidClockFn;
         private TimeSpan _currentClock = TimeSpan.Zero;
@@ -83,7 +83,7 @@ namespace JuvoPlayer.Player.EsPlayer
         private IDisposable SetClockFunction(IScheduler scheduler, PlayerClockFn clockFn)
         {
             _playerClock = clockFn;
-
+            Logger.Info($"Clock Set: {nameof(clockFn)}");
             return Disposable.Empty;
         }
 
@@ -102,19 +102,19 @@ namespace JuvoPlayer.Player.EsPlayer
                 _playerClockSubject.OnNext(_currentClock);
             }
 
-
+            Logger.Info($"Player Clock: {Clock}");
             _intervalConnection = _intervalSource.Connect();
 
-
+            Logger.Info("End");
         }
 
         public void Stop()
         {
-
+            Logger.Info($"Running {_intervalConnection != null}");
             _intervalConnection?.Dispose();
             _intervalConnection = null;
             _currentClock = TimeSpan.Zero;
-
+            Logger.Info("End");
         }
 
         public void Dispose()
@@ -126,7 +126,7 @@ namespace JuvoPlayer.Player.EsPlayer
             _playerClockSubject.Dispose();
             _isDisposed = true;
 
-
+            Logger.Info("End");
         }
     }
 }

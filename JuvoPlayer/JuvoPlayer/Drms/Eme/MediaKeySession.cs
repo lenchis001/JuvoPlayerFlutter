@@ -20,12 +20,15 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using JuvoPlayer.Common;
+using JuvoLogger;
 using JuvoPlayer.Common.Utils.IReferenceCountable;
 
 namespace JuvoPlayer.Drms
 {
     internal sealed class MediaKeySession : IDrmSession
     {
+        private readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
         private readonly DrmInitData initData;
         private string sessionId;
         private bool licenceInstalled;
@@ -51,7 +54,8 @@ namespace JuvoPlayer.Drms
         public void SetLicenceInstalled()
         {
             licenceInstalled = true;
-            initializationTcs.TrySetResult(true);
+            if(initializationTcs.TrySetResult(true))
+                Logger.Info($"Licence for session {sessionId} marked as installed.");
         }
 
         public bool IsInitialized() => licenceInstalled;
@@ -64,6 +68,7 @@ namespace JuvoPlayer.Drms
         {
             if (string.IsNullOrEmpty(drmDescription?.LicenceUrl))
             {
+                Logger.Error("Licence url is null");
                 throw new NullReferenceException("Licence url is null");
             }
 
@@ -77,6 +82,7 @@ namespace JuvoPlayer.Drms
 
         public void Dispose()
         {
+            Logger.Info($"Disposing MediaKeySession: {sessionId}");
             if (isDisposed)
                 return;
             isDisposed = true;

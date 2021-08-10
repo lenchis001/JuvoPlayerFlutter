@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using JuvoPlayer.Common;
-
+using JuvoLogger;
 using Tizen.TV.NUI.GLApplication;
 using System.Reactive.Linq;
 using System.Threading;
@@ -48,7 +48,7 @@ namespace JuvoPlayer.OpenGL
         private bool _playbackCompletedNeedsHandling;
 
         private const string Tag = "JuvoPlayer";
-
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger(Tag);
 
         private OptionsMenu _options;
         private ResourceLoader _resourceLoader;
@@ -76,7 +76,7 @@ namespace JuvoPlayer.OpenGL
         protected override void OnCreate()
         {
             _uiContext = SynchronizationContext.Current;
-
+            OpenGlLoggerManager.Configure(_uiContext);
             _seekLogic = new SeekLogic(this);
             DllImports.Create();
             InitializeKeyHandlersMap();
@@ -241,7 +241,7 @@ namespace JuvoPlayer.OpenGL
         {
             _options = new OptionsMenu
             {
-
+                Logger = Logger
             };
         }
 
@@ -353,6 +353,12 @@ namespace JuvoPlayer.OpenGL
         {
             ShowAlert(title, body, button);
             await AwaitDisplayAlert();
+        }
+
+        public static unsafe void PushLog(string log)
+        {
+            fixed (byte* text = ResourceLoader.GetBytes(log))
+                DllImports.PushLog(text, log.Length);
         }
 
         private unsafe void ShowAlert(string title, string body, string button)
@@ -497,7 +503,7 @@ namespace JuvoPlayer.OpenGL
                     .ObserveOn(SynchronizationContext.Current)
                     .Subscribe(message =>
                     {
-
+                        Logger?.Info($"Playback Error: {message}");
                         ReturnToMainMenu();
                         DisplayAlert("Playback Error", message, "OK").ConfigureAwait(true);
                     });
@@ -507,6 +513,8 @@ namespace JuvoPlayer.OpenGL
                     .Subscribe(UpdateBufferingProgress);
             }
 
+            Logger?.Info(
+                $"Playing {_resourceLoader.ContentList[_selectedTile].Title} ({_resourceLoader.ContentList[_selectedTile].Url})");
             Player.SetSource(_resourceLoader.ContentList[_selectedTile]);
             _options.ClearOptionsMenu();
             SetSeekLogicAndSeekPreview();
@@ -526,7 +534,7 @@ namespace JuvoPlayer.OpenGL
         {
             _bufferingProgress = percent;
             _bufferingInProgress = percent < 100;
-
+            Logger.Info($"Buffering {(_bufferingInProgress ? $"in progress: {percent}%" : "ended")}.");
         }
 
         private void ReturnToMainMenu()
@@ -550,7 +558,7 @@ namespace JuvoPlayer.OpenGL
 
         private void ClosePlayer()
         {
-
+            Logger?.Info("Closing player");
             Player?.Stop();
             Player?.Dispose();
             Player = null;
@@ -643,7 +651,7 @@ namespace JuvoPlayer.OpenGL
                 return;
 
             _playbackCompletedNeedsHandling = false;
-
+            Logger?.Info($"Playback completed. Returning to menu.");
             if (_isMenuShown)
                 return;
             _progressBarShown = false;
@@ -684,6 +692,8 @@ namespace JuvoPlayer.OpenGL
             {
                 _progressBarShown = false;
                 _options.Hide();
+                Logger?.Info(
+                    $"{(DateTime.Now - _lastKeyPressTime).TotalMilliseconds} ms of inactivity, hiding progress bar.");
             }
 
             if (!_resourceLoader.IsLoadingFinished)

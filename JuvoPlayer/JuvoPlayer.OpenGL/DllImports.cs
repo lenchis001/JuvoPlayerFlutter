@@ -212,6 +212,12 @@ namespace JuvoPlayer.OpenGL
         [DllImport(GlUiLib, EntryPoint = "UpdateGraphRange")]
         public static extern void UpdateGraphRange(int graphId, float minVal, float maxVal);
 
+        [DllImport(GlUiLib, EntryPoint = "SetLogConsoleVisibility")]
+        public static extern void SetLogConsoleVisibility(int visible);
+
+        [DllImport(GlUiLib, EntryPoint = "PushLog")]
+        public static extern void PushLog(byte* log, int logLen);
+
         [DllImport(GlUiLib, EntryPoint = "ShowAlert")]
         public static extern void ShowAlert(AlertData alertData);
 

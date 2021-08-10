@@ -17,6 +17,7 @@
 
 using System;
 using JuvoPlayer.Common;
+using JuvoLogger;
 using JuvoPlayer.Demuxers;
 using JuvoPlayer.Demuxers.FFmpeg;
 using System.Runtime.InteropServices;
@@ -26,9 +27,11 @@ namespace JuvoPlayer.DataProviders.Dash
     public class DashDataProviderFactory : IDataProviderFactory
     {
         private const string Tag = "JuvoPlayer";
+        private readonly ILogger Logger = LoggerManager.GetInstance().GetLogger(Tag);
 
         public IDataProvider Create(ClipDefinition clip)
         {
+            Logger.Info("Create.");
             if (clip == null)
             {
                 throw new ArgumentNullException(nameof(clip), "Clip cannot be null.");

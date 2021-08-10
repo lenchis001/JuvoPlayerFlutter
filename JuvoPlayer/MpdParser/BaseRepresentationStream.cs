@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using JuvoLogger;
 
 namespace MpdParser.Node.Dynamic
 {
@@ -62,6 +63,8 @@ namespace MpdParser.Node.Dynamic
             AvailabilityTimeOffset = availabilityTimeOffset;
             AvailabilityTimeComplete = availabilityTimeComplete;
         }
+
+        protected static ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         private ManifestParameters parameters;
 
@@ -263,6 +266,10 @@ namespace MpdParser.Node.Dynamic
 
             if (idx < 0 && pointInTime == Duration)
                 idx = Segments.Count - 1;
+
+            if (idx < 0)
+                Logger.Warn(
+                    $"Failed to find index segment in @time. FA={Segments[0].Period.Start} Req={pointInTime} LA={Segments[Segments.Count - 1].Period.Start}, Duration={Duration}");
 
             return idx;
         }

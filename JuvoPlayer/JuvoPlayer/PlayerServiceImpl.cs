@@ -23,7 +23,7 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using ElmSharp;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using JuvoPlayer.DataProviders;
 using JuvoPlayer.DataProviders.Dash;
@@ -38,7 +38,7 @@ namespace JuvoPlayer
 {
     public class PlayerServiceImpl : IPlayerService
     {
-
+        private readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         private IDataProvider dataProvider;
         private IPlayerController playerController;
@@ -147,7 +147,7 @@ namespace JuvoPlayer
 
         public Task ChangeActiveStream(StreamDescription streamDescription)
         {
-
+            Logger.Info($"ChangeActiveStream {streamDescription.StreamType} {streamDescription.Id} {streamDescription.Description}");
 
             var isAV = streamDescription.StreamType == StreamType.Audio ||
                        streamDescription.StreamType == StreamType.Video;
@@ -191,7 +191,8 @@ namespace JuvoPlayer
 
         public void Start()
         {
-
+            Logger.Info("Player start requested");
+            Logger.Info(State.ToString());
 
             if (!dataProvider.IsDataAvailable())
             {
@@ -204,7 +205,7 @@ namespace JuvoPlayer
 
         private void RestartPlayerController()
         {
-
+            Logger.Info("Player controller restart");
 
             dataProvider.OnStopped();
             _playerControllerConnections.Dispose();

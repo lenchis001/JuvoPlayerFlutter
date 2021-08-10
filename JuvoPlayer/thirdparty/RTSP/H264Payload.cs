@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using JuvoLogger;
 
 namespace Rtsp
 {
@@ -10,6 +11,8 @@ namespace Rtsp
 
     public class H264Payload
     {
+        private static readonly ILogger _logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
         int norm, fu_a, fu_b, stap_a, stap_b, mtap16, mtap24 = 0; // used for diagnostics stats
 
         List<byte[]> temporary_rtp_payloads = new List<byte[]>(); // used to assemble the RTP packets that form one RTP Frame
@@ -45,6 +48,8 @@ namespace Rtsp
         // Returns a list of NAL Units (with no 00 00 00 01 header and with no Size header)
         private List<byte[]> Process_H264_RTP_Frame(List<byte[]> rtp_payloads)
         {
+            _logger.Debug("RTP Data comprised of " + rtp_payloads.Count + " rtp packets");
+
             List<byte[]> nal_units = new List<byte[]>(); // Stores the NAL units for a Video Frame. May be more than one NAL unit in a video frame.
 
             for (int payload_index = 0; payload_index < rtp_payloads.Count; payload_index++)
@@ -58,12 +63,14 @@ namespace Rtsp
                 // So write the NAL to the file
                 if (nal_header_type >= 1 && nal_header_type <= 23)
                 {
+                    _logger.Debug("Normal NAL");
                     norm++;
                     nal_units.Add(rtp_payloads[payload_index]);
                 }
                 // There are 4 types of Aggregation Packet (split over RTP payloads)
                 else if (nal_header_type == 24)
                 {
+                    _logger.Debug("Agg STAP-A");
                     stap_a++;
 
                     // RTP packet contains multiple NALs, each with a 16 bit header
@@ -85,22 +92,27 @@ namespace Rtsp
                     }
                     catch
                     {
+                        _logger.Debug("H264 Aggregate Packet processing error");
                     }
                 }
                 else if (nal_header_type == 25)
                 {
+                    _logger.Debug("Agg STAP-B not supported");
                     stap_b++;
                 }
                 else if (nal_header_type == 26)
                 {
+                    _logger.Debug("Agg MTAP16 not supported");
                     mtap16++;
                 }
                 else if (nal_header_type == 27)
                 {
+                    _logger.Debug("Agg MTAP24 not supported");
                     mtap24++;
                 }
                 else if (nal_header_type == 28)
                 {
+                    _logger.Debug("Frag FU-A");
                     fu_a++;
 
                     // Parse Fragmentation Unit Header
@@ -108,6 +120,8 @@ namespace Rtsp
                     int fu_header_e = (rtp_payloads[payload_index][1] >> 6) & 0x01;  // end marker
                     int fu_header_r = (rtp_payloads[payload_index][1] >> 5) & 0x01;  // reserved. should be 0
                     int fu_header_type = (rtp_payloads[payload_index][1] >> 0) & 0x1F; // Original NAL unit header
+
+                    _logger.Debug("Frag FU-A s=" + fu_header_s + "e=" + fu_header_e);
 
                     // Check Start and End flags
                     if (fu_header_s == 1 && fu_header_e == 0)
@@ -149,13 +163,18 @@ namespace Rtsp
 
                 else if (nal_header_type == 29)
                 {
+                    _logger.Debug("Frag FU-B not supported");
                     fu_b++;
                 }
                 else
                 {
+                    _logger.Debug("Unknown NAL header " + nal_header_type + " not supported");
                 }
 
             }
+
+            // Output some statistics
+            _logger.Debug("Norm=" + norm + " ST-A=" + stap_a + " ST-B=" + stap_b + " M16=" + mtap16 + " M24=" + mtap24 + " FU-A=" + fu_a + " FU-B=" + fu_b);
 
             // Output all the NALs that form one RTP Frame (one frame of video)
             return nal_units;

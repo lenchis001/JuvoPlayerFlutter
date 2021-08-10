@@ -17,14 +17,14 @@
 
 using System;
 using System.Threading.Tasks;
-
+using JuvoLogger;
 using JuvoPlayer.ResourceLoaders;
 
 namespace JuvoPlayer.OpenGL
 {
     class TileResource : Resource
     {
-
+        private readonly ILogger _logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
         private readonly int _id;
         private ImageData _image;
         private readonly string _name;
@@ -48,6 +48,8 @@ namespace JuvoPlayer.OpenGL
             }
             catch (Exception ex)
             {
+                _logger.Error(ex);
+
                 if (!_image.Path.EndsWith(DefaultImage))
                 {
                     _image.Path = ResourceFactory.Create(DefaultImage).AbsolutePath;

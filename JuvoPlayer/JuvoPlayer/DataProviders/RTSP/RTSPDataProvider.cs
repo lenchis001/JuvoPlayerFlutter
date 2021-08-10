@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using JuvoPlayer.Demuxers;
 using JuvoPlayer.Subtitles;
@@ -30,7 +30,7 @@ namespace JuvoPlayer.DataProviders.RTSP
 {
     internal class RTSPDataProvider : IDataProvider
     {
-
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
         private readonly IDemuxerController demuxerController;
         private readonly IRTSPClient rtspClient;
         private readonly ClipDefinition currentClip;
@@ -50,7 +50,7 @@ namespace JuvoPlayer.DataProviders.RTSP
 
         public void Resume()
         {
-
+            Logger.Info("");
             rtspClient.Play();
         }
 
@@ -133,13 +133,13 @@ namespace JuvoPlayer.DataProviders.RTSP
 
         public void Stop()
         {
-
+            Logger.Info("");
             rtspClient.Stop();
         }
 
         public void Start()
         {
-
+            Logger.Info("");
 
             // Start demuxer before client. Demuxer start clears
             // underlying buffer. We do not want that to happen after client
@@ -162,11 +162,15 @@ namespace JuvoPlayer.DataProviders.RTSP
 
         public void Dispose()
         {
-            IAsyncResult rtspCompletion = rtspClient.Stop().WithoutException();
+            Logger.Info("");
+
+            IAsyncResult rtspCompletion = rtspClient.Stop().WithoutException(Logger);
             WaitHandle.WaitAll(new[] { rtspCompletion.AsyncWaitHandle });
 
             rtspClient.Dispose();
             demuxerController.Dispose();
+
+            Logger.Info("Done");
         }
 
         public List<StreamDescription> GetStreamsDescription(StreamType streamType)
@@ -176,6 +180,7 @@ namespace JuvoPlayer.DataProviders.RTSP
 
         public void Pause()
         {
+            Logger.Info("");
             rtspClient.Pause();
         }
     }

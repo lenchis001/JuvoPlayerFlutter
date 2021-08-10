@@ -29,6 +29,8 @@ namespace JuvoPlayer
 {
     public class PlayerServiceProxy<T> : IPlayerService where T : IPlayerService, new()
     {
+        private readonly JuvoLogger.ILogger Logger = JuvoLogger.LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
         private readonly AsyncContextThread playerThread;
         private IPlayerService proxied;
 
@@ -48,7 +50,12 @@ namespace JuvoPlayer
 
         public void SetWindow(Window window)
         {
-            playerThread.Factory.StartNew(() => proxied.SetWindow(window));
+            Logger.Info("SetWindow requested.");
+            playerThread.Factory.StartNew(() => {
+                Logger.Info("Set window started.");
+                proxied.SetWindow(window);
+                Logger.Info("Set window finished.");
+            });
         }
         public TimeSpan Duration => proxied.Duration;
 
@@ -87,12 +94,20 @@ namespace JuvoPlayer
 
         public Task SetSource(ClipDefinition clip)
         {
-            return playerThread.Factory.StartNew(async () => await proxied.SetSource(clip)).Unwrap();
+            Logger.Info("SetSource requested.");
+            return playerThread.Factory.StartNew(async () => {
+                Logger.Info("SetSource started.");
+                await proxied.SetSource(clip);
+                Logger.Info("SetSource finished.");
+            }).Unwrap();
         }
 
         public void Start()
         {
-            playerThread.Factory.StartNew(() => proxied.Start());
+            Logger.Info("PlayerServiceProxy.Start()");
+            playerThread.Factory.StartNew(() => {
+                proxied.Start();
+            });
         }
 
         public void Stop()

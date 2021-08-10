@@ -21,7 +21,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Configuration;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 using JuvoPlayer.Drms;
 
@@ -37,7 +37,7 @@ namespace JuvoPlayer.Player
 
         private readonly Subject<string> streamErrorSubject = new Subject<string>();
 
-
+        private readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         public PlayerController(IPlayer player, IDrmManager drmManager)
         {
@@ -121,7 +121,7 @@ namespace JuvoPlayer.Player
 
         public void OnStop()
         {
-
+            Logger.Info("");
 
             foreach (var stream in streams.Values)
                 stream.OnClearStream();
@@ -179,7 +179,7 @@ namespace JuvoPlayer.Player
 
         public void Dispose()
         {
-
+            Logger.Info("");
             // It is possible that streams waits for some events to complete
             // eg. drm initialization, and after unblock they will call disposed
             // player.

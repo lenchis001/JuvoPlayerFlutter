@@ -19,7 +19,7 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-
+using JuvoLogger;
 using MpdParser;
 using static Configuration.DashManifest;
 
@@ -28,7 +28,7 @@ namespace JuvoPlayer.DataProviders.Dash
     internal class DashManifest : IDisposable
     {
         private const string Tag = "JuvoPlayer";
-
+        private readonly ILogger Logger = LoggerManager.GetInstance().GetLogger(Tag);
 
         private Uri Uri { get; }
 
@@ -104,11 +104,11 @@ namespace JuvoPlayer.DataProviders.Dash
                         break;
                     }
 
-
+                    Logger.Error($"Manifest parse error {Uri}");
                 }
                 else
                 {
-
+                    Logger.Warn($"Manifest download failure {Uri}");
                 }
 
                 cancelToken.ThrowIfCancellationRequested();
@@ -144,7 +144,7 @@ namespace JuvoPlayer.DataProviders.Dash
 
         private async Task<string> DownloadManifest(CancellationToken ct)
         {
-
+            Logger.Info($"Downloading Manifest {Uri}");
 
             try
             {
@@ -154,7 +154,7 @@ namespace JuvoPlayer.DataProviders.Dash
                 {
                     response.EnsureSuccessStatusCode();
 
-
+                    Logger.Info($"Downloading Manifest Done in {DateTime.Now - startTime} {Uri}");
 
                     var result = await response.Content.ReadAsStringAsync();
                     return result;
@@ -162,14 +162,14 @@ namespace JuvoPlayer.DataProviders.Dash
             }
             catch (Exception ex)
             {
-
+                Logger.Error(ex, "Cannot download manifest file");
                 return null;
             }
 
         }
         private async Task<Document> ParseManifest(string aManifest)
         {
-
+            Logger.Info($"Parsing Manifest {Uri}");
             try
             {
                 var startTime = DateTime.Now;
@@ -178,12 +178,12 @@ namespace JuvoPlayer.DataProviders.Dash
                         "Xml manifest is empty."),
                     Uri.ToString());
 
-
+                Logger.Info($"Parsing Manifest Done in {DateTime.Now - startTime} {Uri}");
                 return document;
             }
             catch (Exception ex)
             {
-
+                Logger.Error(ex, "Cannot parse manifest file");
                 return null;
             }
         }

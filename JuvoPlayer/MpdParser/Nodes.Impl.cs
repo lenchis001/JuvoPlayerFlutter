@@ -180,6 +180,8 @@ namespace MpdParser.Node
 
     public partial class Representation
     {
+        private JuvoLogger.ILogger Logger = JuvoLogger.LoggerManager.GetInstance().GetLogger("JuvoPlayer");
+
         private static TimeSpan Scale(ulong offset, uint scale)
         {
             return TimeSpan.FromSeconds(((double)offset) / scale);
@@ -225,7 +227,10 @@ namespace MpdParser.Node
 
         public IRepresentationStream SegmentsStream()
         {
+            Logger.Info("Detecting of SegmentsStream.");
+
             SegmentType best = FindBestStream();
+            Logger.Info("'best' is " + best);
             switch (best)
             {
                 case SegmentType.Base: return CreateBaseRepresentationStream();
@@ -234,6 +239,7 @@ namespace MpdParser.Node
             }
             // No "SegmentXyz" elements, but at least one BaseURL present
             // This setup could be in e.g. subtitles
+            Logger.Info("BaseURLs.Length:" + BaseURLs.Length);
             if (BaseURLs.Length > 0)
                 return CreateBaseURLRepresentationStream();
             return null;
@@ -360,24 +366,36 @@ namespace MpdParser.Node
 
         private Dynamic.TimelineItem[] FromDuration(uint startNumber, Dynamic.SegmentTemplate seg)
         {
+            Logger.Info("Getting TimelineItem from duration.");
+
             uint? segDuration = seg.Duration;
-            if (segDuration == null)
+            if (segDuration == null) {
+                Logger.Info("segDuration is null.");
                 return null;
+            }
 
             TimeSpan start = Period.Start ?? TimeSpan.Zero;
 
             TimeSpan? duration = Period.Duration;
+            Logger.Info("start:" + start + "duration:" + duration);
             if (duration == null)
             {
+                Logger.Info("duration is null");
+                Logger.Info("Document.MediaPresentationDuration is null:" + (Document.MediaPresentationDuration == null));
+                
                 TimeSpan mpdDuration = Document.MediaPresentationDuration ?? TimeSpan.Zero;
+                
+                Logger.Info("mpdDuration:" + mpdDuration);
                 if (mpdDuration <= start)
                     duration = TimeSpan.Zero;
                 else
                     duration = mpdDuration - start;
             }
 
-            if (duration.Equals(TimeSpan.Zero))
+            if (duration.Equals(TimeSpan.Zero)){
+                Logger.Info("duration is TimeSpan.Zero");
                 return null;
+            }
 
             return Dynamic.Timeline.FromDuration(startNumber, start,
                 duration.Value, segDuration.Value, seg.Timescale ?? 1);
@@ -397,15 +415,19 @@ namespace MpdParser.Node
             Dynamic.TimelineItem[] timeline = null;
             if (segTimeline == null)
             {
+                Logger.Info("Getting timeline from duration");
                 timeline = FromDuration(startNumber, seg);
             }
             else
             {
+                Logger.Info("Getting timeline from 'Timeline'");
                 timeline = FromTimeline(startNumber, seg, segTimeline);
             }
 
-            if (timeline == null)
+            if (timeline == null) {
+                Logger.Error("Cannot create a template representation stream. timeline is null");
                 return null;
+            }
 
             // Live content elements from Segment Base...
             var presentationTimeOffset = seg.PresentationTimeOffset ?? 0;

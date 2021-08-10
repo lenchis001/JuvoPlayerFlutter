@@ -17,7 +17,7 @@
 
 using System;
 using System.Collections.Generic;
-
+using JuvoLogger;
 using JuvoPlayer.Common;
 
 namespace JuvoPlayer.OpenGL

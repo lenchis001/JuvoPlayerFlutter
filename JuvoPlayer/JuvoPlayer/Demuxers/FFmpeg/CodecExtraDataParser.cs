@@ -21,13 +21,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FFmpegBindings.Interop;
-
+using JuvoLogger;
 
 namespace JuvoPlayer.Demuxers.FFmpeg
 {
     internal class CodecExtraDataParser
     {
-
+        private static readonly ILogger Logger = LoggerManager.GetInstance().GetLogger("JuvoPlayer");
 
         internal static unsafe byte[] Parse(AVCodecID codecId, byte* extradata, int size)
         {
@@ -119,7 +119,7 @@ namespace JuvoPlayer.Demuxers.FFmpeg
             if (extraDataSize < 6)
             {
                 // Min first 5 byte + num_sps
-
+                Logger.Error("extra_data is too short to pass valid SPS/PPS header");
                 return null;
             }
 
@@ -133,6 +133,7 @@ namespace JuvoPlayer.Demuxers.FFmpeg
             if ((lengthSize & 0xFCu) != 0xFCu)
             {
                 // Be liberal in what you accept..., so just log error
+                Logger.Warn("Not all reserved bits in length size filed are set to 1");
             }
 
             lengthSize = (byte) ((lengthSize & 0x3u) + 1);
@@ -141,6 +142,7 @@ namespace JuvoPlayer.Demuxers.FFmpeg
             if ((numSps & 0xE0u) != 0xE0u)
             {
                 // Be liberal in what you accept..., so just log error
+                Logger.Warn("Wrong SPS count format.");
             }
 
             numSps &= 0x1Fu;
@@ -148,13 +150,13 @@ namespace JuvoPlayer.Demuxers.FFmpeg
             var spses = ReadH264ParameterSets(extraData, extraDataSize, numSps, ref idx);
             if (spses == null)
             {
-
+                Logger.Error("extra data too short");
                 return null;
             }
 
             if (extraDataSize <= idx)
             {
-
+                Logger.Error("extra data too short");
                 return null;
             }
 
@@ -163,7 +165,7 @@ namespace JuvoPlayer.Demuxers.FFmpeg
             var ppses = ReadH264ParameterSets(extraData, extraDataSize, numPps, ref idx);
             if (ppses == null)
             {
-
+                Logger.Error("extra data too short");
                 return null;
             }
 
@@ -204,14 +206,14 @@ namespace JuvoPlayer.Demuxers.FFmpeg
             {
                 if (extraDataSize < idx + 2)
                 {
-
+                    Logger.Error("extra data too short");
                     return null;
                 }
 
                 uint length = ReadUInt16(extraData, ref idx);
                 if (extraDataSize < idx + length)
                 {
-
+                    Logger.Error("extra data too short");
                     return null;
                 }
 
@@ -306,7 +308,7 @@ namespace JuvoPlayer.Demuxers.FFmpeg
             if (extraDataSize < 21)
             {
                 // Min first 5 byte + num_sps
-
+                Logger.Error("extra_data is too short to pass valid SPS/PPS header");
                 return null;
             }
 
@@ -319,7 +321,7 @@ namespace JuvoPlayer.Demuxers.FFmpeg
             {
                 if (extraDataSize < idx + 3)
                 {
-
+                    Logger.Error("extra data too short");
                     return null;
                 }
 
@@ -329,14 +331,14 @@ namespace JuvoPlayer.Demuxers.FFmpeg
                 {
                     if (extraDataSize < idx + 2)
                     {
-
+                        Logger.Error("extra data too short");
                         return null;
                     }
 
                     var nalUnitLength = ReadUInt16(extraData, ref idx);
                     if (extraDataSize < idx + nalUnitLength)
                     {
-
+                        Logger.Error("extra data too short");
                         return null;
                     }
 
