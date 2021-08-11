@@ -59,11 +59,13 @@ namespace JuvoPlayer.Drms
 
         public CdmInstance(string keySystem)
         {   
+            Logger.Info($"{keySystem} support status is {IEME.isKeySystemSupported(keySystem)}");
+
             cdmInstance = IEME.create(this, keySystem, false, CDM_MODEL.E_CDM_MODEL_DEFAULT);
             if (cdmInstance == null)
             {
-                Logger.Error($"Cannot create CDM instance for key system ${keySystem}!");
-                throw new DrmException($"Cannot create CDM instance for key system ${keySystem}!");
+                Logger.Error($"Cannot create CDM instance for key system {keySystem}!");
+                throw new DrmException($"Cannot create CDM instance for key system {keySystem}!");
             }
 
             KeySystem = keySystem;
