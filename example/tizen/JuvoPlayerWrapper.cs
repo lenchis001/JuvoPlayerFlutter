@@ -108,13 +108,13 @@ namespace Runner{
                 /////////////Clean contents////////////////////
                 //var url = "http://yt-dash-mse-test.commondatastorage.googleapis.com/media/car-20120827-manifest.mpd";
                 //var url = "https://livesim.dashif.org/livesim/testpic_2s/Manifest.mpd";
-                var url = "https://bitdash-a.akamaihd.net/content/sintel/sintel.mpd";
+                //var url = "https://bitdash-a.akamaihd.net/content/sintel/sintel.mpd";
                 //var url = "http://distribution.bbb3d.renderfarming.net/video/mp4/bbb_sunflower_1080p_30fps_normal.mp4";
                 //var url = "http://wowzaec2demo.streamlock.net/live/bigbuckbunny/manifest_mvtime.mpd";
 
                 /////////////Play Ready encrypted content//////
-                //var url = "https://media.axprod.net/TestVectors/v7-MultiDRM-SingleKey/Manifest_1080p.mpd";
-                //var license = "https://drm-widevine-licensing.axtest.net/AcquireLicense";
+                var url = "https://media.axprod.net/TestVectors/v7-MultiDRM-SingleKey/Manifest_1080p.mpd";
+                var license = "https://drm-widevine-licensing.axtest.net/AcquireLicense";
                 //var url = "http://yt-dash-mse-test.commondatastorage.googleapis.com/media/oops_cenc-20121114-signedlicenseurl-manifest.mpd";
                 //var license = ""; //The license url is embeded in the video source .mpd file above
 
@@ -128,8 +128,8 @@ namespace Runner{
 
                 //////The TV platform MediaPlayer (URL data source only).
                 platformPlayer = new TVMultimedia.Player { Display = new Display(window) };
-                await PlayPlatformMediaClean(url, platformPlayer);
-                //await PlayPlatformMediaDRMed(url, license, platformPlayer);
+                //await PlayPlatformMediaClean(url, platformPlayer);
+                await PlayPlatformMediaDRMed(url, license, platformPlayer);
 
                 //////The JuvoPlayer backend (elementary stream data source).
                 
